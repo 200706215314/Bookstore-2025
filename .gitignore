@@ -1,1 +1,5 @@
 requirements.md
+build/
+./code
+cmake-build-debug
+.idea/
