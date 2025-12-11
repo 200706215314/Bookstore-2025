@@ -1,6 +1,21 @@
 requirements.md
+
+# build
 build/
+
 ./code
 cmake-build-debug
-.idea/
-1075/
+
+# CLion
+.idea/**
+
+# testcases
+testcase/**
+
+# download files
+bonus.md
+README.md
+业务要求.md
+标准要求.md
+
+# storage files
