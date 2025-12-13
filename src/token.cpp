@@ -1,4 +1,5 @@
 #include "../include/token.h"
+#include <sstream>
 
 std::vector<std::string> tokenize(const std::string& s) {
     std::vector<std::string> tokens;
@@ -25,5 +26,60 @@ bool isValidArgument(const std::string &s) {
 }
 
 std::vector<std::string> tokenizeWithQuotes(const std::string &s) {
+    std::vector<std::string> tokens;
+    std::string currentToken;
+    bool inQuotes = false;
 
+    for (size_t i = 0; i < s.length(); i++) {
+        char c = s[i];
+
+        if (c == '\"') {
+            inQuotes = !inQuotes;
+            currentToken += c;
+        } else if (c == ' ' && !inQuotes) {
+            if (!currentToken.empty()) {
+                tokens.push_back(currentToken);
+                currentToken.clear();
+            }
+        } else {
+            currentToken += c;
+        }
+    }
+
+    if (!currentToken.empty()) {
+        tokens.push_back(currentToken);
+    }
+
+    return tokens;
+}
+
+std::vector<std::string> tokenizeCommand(const std::string& s) {
+    std::vector<std::string> tokens;
+    std::istringstream iss(s);
+    std::string token;
+
+    while (iss >> token) {
+        if (token.find('-') == 0) {
+            if (token.find('\"') != std::string::npos) {
+                if (token.back() == '\"') {
+                    tokens.push_back(token);
+                } else {
+                    std::string rest;
+                    while (iss >> rest) {
+                        token += " " + rest;
+                        if (rest.find('\"') != std::string::npos) {
+                            break;
+                        }
+                    }
+                    tokens.push_back(token);
+                }
+            } else {
+                tokens.push_back(token);
+            }
+        } else {
+            tokens.push_back(token);
+        }
+    }
+
+    return tokens;
 }
