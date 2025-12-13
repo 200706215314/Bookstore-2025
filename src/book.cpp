@@ -1,4 +1,7 @@
 #include "../include/book.h"
+#include "../include/parser.h"
+#include "../include/token.h"
+#include <unordered_set>
 
 BookData::BookData() :Price(0.0), Stock(0){
     memset(ISBN, 0, sizeof(ISBN));
@@ -111,6 +114,619 @@ std::string BookData::toString() const {
     return oss.str();
 }
 
+std::ostream& operator<<(std::ostream& os, const BookData& book) {
+    os << book.toString();
+    return os;
+}
+
+BookSystem::BookSystem(const std::string& baseFileName)
+    : isbnMap(baseFileName + "_isbn"),
+      nameIndex(baseFileName + "_name"),
+      authorIndex(baseFileName + "_author"),
+      keywordIndex(baseFileName + "_keyword") {};
+
+bool BookSystem::isValidISBNStr(const std::string& isbn) {
+    if (isbn.empty() || isbn.length() > 20) return false;
+    for (char c : isbn) {
+        if (c < 32 || c > 126) return false; // 不可见字符
+    }
+    return true;
+}
+
+bool BookSystem::isValidBookNameStr(const std::string& name) {
+    if (name.empty() || name.length() > 60) return false;
+    for (const char c : name) {
+        if (c < 32 || c > 126 || c == '\"') return false;
+    }
+    return true;
+}
+
+bool BookSystem::isValidAuthorStr(const std::string& author) {
+    if (author.empty() || author.length() > 60) return false;
+    for (char c : author) {
+        if (c < 32 || c > 126 || c == '\"') return false;
+    }
+    return true;
+}
+
+bool BookSystem::isValidKeywordsStr(const std::string& keywords) const {    //这里传入的关键词格式是 "[Keyword]"
+    if (keywords.empty() || keywords.length() > 60) return false;
+
+    if (keywords.find('\"') != std::string::npos) return false;
+
+    std::vector<std::string> kwList = splitKeywords(keywords);
+    if (kwList.empty()) return false;
+
+    for (const auto& kw : kwList) {
+        if (kw.empty()) return false;
+    }
+
+    std::sort(kwList.begin(), kwList.end());
+    for (size_t i = 1; i < kwList.size(); i++) {
+        if (kwList[i] == kwList[i-1]) return false;
+    }
+    return true;
+}
+
+bool BookSystem::isValidPriceStr(const std::string& priceStr) {
+    if (priceStr.empty() || priceStr.length() > 13) return false;
+
+    int dotCount = 0;
+    bool hasDigit = false;
+
+    for (char c : priceStr) {
+        if (c == '.') {
+            dotCount++;
+            if (dotCount > 1) return false;
+        } else if (isdigit(c)) {
+            hasDigit = true;
+        } else {
+            return false;
+        }
+    }
+
+    if (!hasDigit) return false;
+
+    const size_t dotPos = priceStr.find('.');
+    if (dotPos != std::string::npos) {
+        if (priceStr.length() - dotPos - 1 > 2) return false;
+    }
+
+    try {
+        double price = std::stod(priceStr);
+        if (price < 0) return false;
+    } catch (...) {
+        return false;
+    }
+
+    return true;
+}
+
+bool BookSystem::isValidQuantityStr(const std::string& quantityStr) const {
+    if (quantityStr.empty() || quantityStr.length() > 10) return false;
+
+    for (char c : quantityStr) {
+        if (!isdigit(c)) return false;
+    }
+
+    try {
+        long long qty = std::stoll(quantityStr);
+        return qty > 0 && qty <= 2147483647LL;
+    } catch (...) {
+        return false;
+    }
+}
 
 
+std::vector<std::string> BookSystem::splitKeywords(const std::string& keywords) const {    //要求传入不带“” 的keyword
+    std::vector<std::string> result;
+    if (keywords.empty()) return result;
 
+    size_t start = 0;
+    size_t end = keywords.find('|');
+
+    while (true) {
+        std::string kw;
+        if (end == std::string::npos) {
+            kw = keywords.substr(start);
+        } else {
+            kw = keywords.substr(start, end - start);
+        }
+
+        if (!kw.empty()) {
+            result.push_back(kw);
+        }
+
+        if (end == std::string::npos) break;
+        start = end + 1;
+        end = keywords.find('|', start);
+    }
+
+    return result;
+}
+
+void BookSystem::addToIndices(const BookData& book) {
+    const ISBNIndex isbn(book.getISBN());
+    const NameAuthorIndex name(book.getBookName());
+    NameAuthorIndex author(book.getAuthor());
+    std::vector<std::string> keywords = book.getAllKeywords();
+
+    if (!name.empty()) {
+        nameIndex.insert(name, isbn);
+    }
+
+    if (!author.empty()) {
+        authorIndex.insert(author, isbn);
+    }
+
+    for (const auto& keyword : keywords) {
+        if (!keyword.empty()) {
+            KeywordIndex kwIndex(keyword);
+            keywordIndex.insert(kwIndex, isbn);
+        }
+    }
+}
+
+void BookSystem::removeFromIndices(const BookData& book) {
+    ISBNIndex isbn(book.getISBN());
+    NameAuthorIndex name(book.getBookName());
+    NameAuthorIndex author(book.getAuthor());
+    std::vector<std::string> keywords = book.getAllKeywords();
+
+    if (!name.empty()) {
+        std::vector<ISBNIndex> isbns = nameIndex.find(name);
+        for (const auto& storedIsbn : isbns) {
+            if (storedIsbn == isbn) {
+                nameIndex.remove(name, storedIsbn);
+            }
+        }
+    }
+
+    if (!author.empty()) {
+        std::vector<ISBNIndex> isbns = authorIndex.find(author);
+        for (const auto& storedIsbn : isbns) {
+            if (storedIsbn == isbn) {
+                authorIndex.remove(author, storedIsbn);
+            }
+        }
+    }
+
+    for (const auto& keyword : keywords) {
+        if (!keyword.empty()) {
+            KeywordIndex kwIndex(keyword);
+            std::vector<ISBNIndex> isbns = keywordIndex.find(kwIndex);
+            for (const auto& storedIsbn : isbns) {
+                if (storedIsbn == isbn) {
+                    keywordIndex.remove(kwIndex, storedIsbn);
+                }
+            }
+        }
+    }
+}
+
+void BookSystem::updateIndices(const BookData& oldBook, const BookData& newBook) {
+ISBNIndex isbn(oldBook.getISBN());
+    ISBNIndex newIsbn(newBook.getISBN());
+
+    // ISBN改变
+    if (isbn != newIsbn) {
+        removeFromIndices(oldBook);
+        addToIndices(newBook);
+        return;
+    }
+
+    if (oldBook.getBookName() != newBook.getBookName()) {
+        NameAuthorIndex oldName(oldBook.getBookName());
+        NameAuthorIndex newName(newBook.getBookName());
+
+        if (!oldName.empty()) {
+            std::vector<ISBNIndex> isbns = nameIndex.find(oldName);
+            for (const auto& storedIsbn : isbns) {
+                if (storedIsbn == isbn) {
+                    nameIndex.remove(oldName, storedIsbn);
+                    break;
+                }
+            }
+        }
+        if (!newName.empty()) {
+            nameIndex.insert(newName, isbn);
+        }
+    }
+
+    // 作者改变
+    if (oldBook.getAuthor() != newBook.getAuthor()) {
+        NameAuthorIndex oldAuthor(oldBook.getAuthor());
+        NameAuthorIndex newAuthor(newBook.getAuthor());
+
+        if (!oldAuthor.empty()) {
+            std::vector<ISBNIndex> isbns = authorIndex.find(oldAuthor);
+            for (const auto& storedIsbn : isbns) {
+                if (storedIsbn == isbn) {
+                    authorIndex.remove(oldAuthor, storedIsbn);
+                    break;
+                }
+            }
+        }
+
+        if (!newAuthor.empty()) {
+            authorIndex.insert(newAuthor, isbn);
+        }
+    }
+
+    std::vector<std::string> oldKeywords = oldBook.getAllKeywords();
+    std::vector<std::string> newKeywords = newBook.getAllKeywords();
+
+    std::unordered_set<std::string> oldSet(oldKeywords.begin(), oldKeywords.end());
+    std::unordered_set<std::string> newSet(newKeywords.begin(), newKeywords.end());
+
+    if (oldSet != newSet) {
+        for (const auto& keyword : oldKeywords) {
+            if (newSet.find(keyword) == newSet.end()) {
+                KeywordIndex kwIndex(keyword);
+                std::vector<ISBNIndex> isbns = keywordIndex.find(kwIndex);
+                for (const auto& storedIsbn : isbns) {
+                    if (storedIsbn == isbn) {
+                        keywordIndex.remove(kwIndex, storedIsbn);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (const auto& keyword : newKeywords) {
+            if (oldSet.find(keyword) == oldSet.end()) {
+                KeywordIndex kwIndex(keyword);
+                keywordIndex.insert(kwIndex, isbn);
+            }
+        }
+    }
+}
+
+
+std::vector<BookData> BookSystem::getAllBooksFromMap() const {
+    std::vector<BookData> allBooks;
+
+    // 这里需要一个遍历Map的方法
+    // 暂时返回空向量，需要根据实际情况实现
+    return allBooks;
+}
+
+bool BookSystem::showBooks(const std::string& type, const std::string& value) {  //param_type  param_value
+    std::vector<BookData> results;
+
+    if (type.empty()) {
+        results = getAllBooks();
+    } else if (type == "ISBN") {
+        results = searchByISBN(value);
+    } else if (type == "name") {
+        results = searchByName(value);
+    } else if (type == "author") {
+        results = searchByAuthor(value);
+    } else if (type == "keyword") {
+        results = searchByKeyword(value);
+    } else {
+        return false;
+    }
+
+    std::sort(results.begin(), results.end());   // 按ISBN排序
+
+    if (results.empty()) {
+        std::cout << "\n";
+    } else {
+        for (const auto& book : results) {
+            std::cout << book.toString() << "\n";
+        }
+    }
+    return true;
+}
+
+bool BookSystem::buyBook(const std::string& isbnStr, long long quantity, double& total) {
+    if (!isValidISBNStr(isbnStr) || quantity <= 0) return false;
+
+    BookData book = getBookByISBNStr(isbnStr);
+    if (!book.isValid()) return false;
+
+    if (book.getStock() < quantity) return false;
+
+    total = book.getPrice() * quantity;
+
+    book.decreaseStock(quantity);
+
+    // 更新图书信息
+    ISBNIndex isbn(isbnStr);
+    isbnMap.remove(isbn, book);
+    isbnMap.insert(isbn, book);
+
+
+    addFinanceRecord(total, 0.0);
+
+    return true;
+}
+
+bool BookSystem::selectBook(const std::string& isbnStr) {
+    if (!isValidISBNStr(isbnStr)) return false;
+
+    const ISBNIndex isbn(isbnStr);
+
+    if (!bookExists(isbn)) {
+        return createBook(isbn);
+    }
+
+    return true;
+}
+
+bool BookSystem::modifyBook(const std::string& selectedISBN,
+                           const std::vector<std::pair<std::string, std::string>>& modifications) {  //pair<std::string, std::string> param_type  param_value
+    if (selectedISBN.empty() || !bookExistsStr(selectedISBN)) return false;
+
+    BookData originalBook = getBookByISBNStr(selectedISBN);
+    BookData modifiedBook = originalBook;
+
+    std::string originalISBN = selectedISBN;
+    std::string newISBN = selectedISBN;
+
+    bool isbnModified = false;
+    bool nameModified = false;
+    bool authorModified = false;
+    bool keywordsModified = false;
+    bool priceModified = false;
+
+    for (const auto& mod : modifications) {
+        const std::string& type = mod.first;
+        const std::string& value = mod.second;
+
+        if (type == "ISBN") {
+            if (isbnModified) return false;
+            if (!isValidISBNStr(value)) return false;
+            if (value == selectedISBN) return false;
+            if (bookExistsStr(value)) return false;
+
+            modifiedBook.setISBN(value);
+            newISBN = value;
+            isbnModified = true;
+        }
+        else if (type == "name") {
+            if (nameModified) return false;
+            if (!isValidBookNameStr(value)) return false;
+            modifiedBook.setBookName(value);
+            nameModified = true;
+        }
+        else if (type == "author") {
+            if (authorModified) return false;
+            if (!isValidAuthorStr(value)) return false;
+            modifiedBook.setAuthor(value);
+            authorModified = true;
+        }
+        else if (type == "keyword") {
+            if (keywordsModified) return false;
+            if (!isValidKeywordsStr(value)) return false;
+            modifiedBook.setKeywords(value);
+            keywordsModified = true;
+        }
+        else if (type == "price") {
+            if (priceModified) return false;
+            if (!isValidPriceStr(value)) return false;
+            double price = std::stod(value);
+            modifiedBook.setPrice(price);
+            priceModified = true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    if (!isbnModified && !nameModified && !authorModified &&
+        !keywordsModified && !priceModified) {
+        return false;
+    }
+
+    updateIndices(originalBook, modifiedBook);
+
+    ISBNIndex oldIsbn(originalISBN);
+    ISBNIndex newIsbn(newISBN);
+
+    if (isbnModified) {
+        isbnMap.remove(oldIsbn, originalBook);
+        isbnMap.insert(newIsbn, modifiedBook);
+    } else {
+        isbnMap.remove(oldIsbn, originalBook);
+        isbnMap.insert(oldIsbn, modifiedBook);
+    }
+
+    return true;
+}
+
+bool BookSystem::importBook(const std::string& selectedISBN, long long quantity, double totalCost) {
+    if (selectedISBN.empty() || !bookExistsStr(selectedISBN)) return false;
+    if (quantity <= 0 || totalCost <= 0) return false;
+
+    BookData book = getBookByISBNStr(selectedISBN);
+
+    book.increaseStock(quantity);
+
+    ISBNIndex isbn(selectedISBN);
+    isbnMap.remove(isbn, book);
+    isbnMap.insert(isbn, book);
+
+    addFinanceRecord(0.0, totalCost);
+
+    return true;
+}
+
+BookData BookSystem::getBookByISBN(const ISBNIndex& isbn) {
+    std::vector<BookData> books = isbnMap.find(isbn);
+    if (!books.empty()) {
+        return books[0];
+    }
+    return BookData();
+}
+
+BookData BookSystem::getBookByISBNStr(const std::string& isbnStr) {
+    ISBNIndex isbn(isbnStr);
+    return getBookByISBN(isbn);
+}
+
+std::vector<BookData> BookSystem::searchByISBN(const std::string& isbnStr) {
+    std::vector<BookData> result;
+    BookData book = getBookByISBNStr(isbnStr);
+    if (book.isValid()) {
+        result.push_back(book);
+    }
+    return result;
+}
+
+std::vector<BookData> BookSystem::searchByName(const std::string& name) {
+    std::vector<BookData> result;
+    NameAuthorIndex nameIdx(name);
+    std::vector<ISBNIndex> isbns = nameIndex.find(nameIdx);
+
+    for (const auto& isbn : isbns) {
+        BookData book = getBookByISBN(isbn);
+        if (book.isValid() && book.getBookName() == name) {
+            result.push_back(book);
+        }
+    }
+
+    return result;
+}
+
+std::vector<BookData> BookSystem::searchByAuthor(const std::string& author) {
+    std::vector<BookData> result;
+    NameAuthorIndex authorIdx(author);
+    std::vector<ISBNIndex> isbns = authorIndex.find(authorIdx);
+
+    for (const auto& isbn : isbns) {
+        BookData book = getBookByISBN(isbn);
+        if (book.isValid() && book.getAuthor() == author) {
+            result.push_back(book);
+        }
+    }
+
+    return result;
+}
+
+std::vector<BookData> BookSystem::searchByKeyword(const std::string& keyword) {
+    std::vector<BookData> result;
+    KeywordIndex kwIdx(keyword);
+    std::vector<ISBNIndex> isbns = keywordIndex.find(kwIdx);
+
+    for (const auto& isbn : isbns) {
+        BookData book = getBookByISBN(isbn);
+        if (book.isValid() && book.hasKeyword(keyword)) {
+            result.push_back(book);
+        }
+    }
+    return result;
+}
+
+std::vector<BookData> BookSystem::getAllBooks() {
+    return getAllBooksFromMap();
+}
+
+bool BookSystem::createBook(const ISBNIndex& isbn) {
+    if (isbn.empty() || bookExists(isbn)) return false;
+
+    BookData newBook(isbn.toString());
+    isbnMap.insert(isbn, newBook);
+
+    return true;
+}
+
+bool BookSystem::createBookFromStr(const std::string& isbnStr) {
+    ISBNIndex isbn(isbnStr);
+    return createBook(isbn);
+}
+
+bool BookSystem::bookExists(const ISBNIndex& isbn) {
+    return !isbnMap.find(isbn).empty();
+}
+
+bool BookSystem::bookExistsStr(const std::string& isbnStr) {
+    ISBNIndex isbn(isbnStr);
+    return bookExists(isbn);
+}
+
+bool BookSystem::addFinanceRecord(double income, double expense) {
+    if (income < 0 || expense < 0) return false;
+
+    financeRecords.push_back(FinanceRecord(income, expense));
+    return true;
+}
+
+bool BookSystem::showFinance(int count) const {
+    int totalRecords = financeRecords.size();
+
+    if (count == 0) {
+        std::cout << "\n";
+        return true;
+    }
+
+    if (count > totalRecords && count != -1) {
+        return false;
+    }
+
+    double totalIncome = 0.0;
+    double totalExpense = 0.0;
+
+    if (count == -1) {
+        for (const auto& record : financeRecords) {
+            totalIncome += record.income;
+            totalExpense += record.expense;
+        }
+    } else {
+        int start = totalRecords - count;
+        if (start < 0) start = 0;
+
+        for (int i = start; i < totalRecords; i++) {
+            totalIncome += financeRecords[i].income;
+            totalExpense += financeRecords[i].expense;
+        }
+    }
+
+    std::cout << "+ " << formatDouble(totalIncome)
+              << " - " << formatDouble(totalExpense) << "\n";
+
+    return true;
+}
+
+std::pair<double, double> BookSystem::getFinanceSummary(int count) const {
+    double totalIncome = 0.0;
+    double totalExpense = 0.0;
+
+    int totalRecords = financeRecords.size();
+
+    if (count == -1 || count >= totalRecords) {
+        for (const auto& record : financeRecords) {
+            totalIncome += record.income;
+            totalExpense += record.expense;
+        }
+    } else {
+        int start = totalRecords - count;
+        if (start < 0) start = 0;
+
+        for (int i = start; i < totalRecords; i++) {
+            totalIncome += financeRecords[i].income;
+            totalExpense += financeRecords[i].expense;
+        }
+    }
+
+    return {totalIncome, totalExpense};
+}
+
+std::string BookSystem::formatDouble(double value) {
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(2) << value;
+    std::string result = oss.str();
+
+    size_t dotPos = result.find('.');
+    if (dotPos != std::string::npos) {
+        while (result.back() == '0') {
+            result.pop_back();
+        }
+        if (result.back() == '.') {
+            result.pop_back();
+        }
+    }
+
+    return result;
+}

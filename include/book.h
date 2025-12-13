@@ -57,6 +57,9 @@ public:
     bool operator==(const BookData& other) const {
         return strcmp(ISBN, other.ISBN) == 0;
     }
+    bool operator!=(const BookData& other) const {
+        return strcmp(ISBN, other.ISBN) != 0;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const BookData& book);
 };
@@ -96,6 +99,17 @@ public:
     bool operator!=(const ISBNIndex& other) const {
         return strcmp(data, other.data) != 0;
     }
+    bool operator<=(const ISBNIndex& other) const {
+        return strcmp(data, other.data) <= 0;
+    }
+
+    bool operator>(const ISBNIndex& other) const {
+        return strcmp(data, other.data) > 0;
+    }
+
+    bool operator>=(const ISBNIndex& other) const {
+        return strcmp(data, other.data) >= 0;
+    }
 
     bool empty() const { return data[0] == '\0'; }
 
@@ -110,7 +124,9 @@ private:
     char data[61] = {0};
 
 public:
-    NameAuthorIndex() { data[0] = '\0'; }
+    NameAuthorIndex() {
+        data[0] = '\0';
+    }
 
     NameAuthorIndex(const std::string& str) {
         strncpy(data, str.c_str(), 60);
@@ -126,11 +142,36 @@ public:
         }
     }
 
+    NameAuthorIndex(const NameAuthorIndex& other) {
+        strncpy(data, other.data, 61);
+    }
+
+    NameAuthorIndex& operator=(const NameAuthorIndex& other) {
+        if (this != &other) {
+            strncpy(data, other.data, 61);
+        }
+        return *this;
+    }
+
     const char* c_str() const { return data; }
     std::string toString() const { return std::string(data); }
 
+    bool empty() const { return data[0] == '\0'; }
+
     bool operator<(const NameAuthorIndex& other) const {
         return strcmp(data, other.data) < 0;
+    }
+
+    bool operator<=(const NameAuthorIndex& other) const {
+        return strcmp(data, other.data) <= 0;
+    }
+
+    bool operator>(const NameAuthorIndex& other) const {
+        return strcmp(data, other.data) > 0;
+    }
+
+    bool operator>=(const NameAuthorIndex& other) const {
+        return strcmp(data, other.data) >= 0;
     }
 
     bool operator==(const NameAuthorIndex& other) const {
@@ -140,8 +181,6 @@ public:
     bool operator!=(const NameAuthorIndex& other) const {
         return strcmp(data, other.data) != 0;
     }
-
-    bool empty() const { return data[0] == '\0'; }
 
     friend std::ostream& operator<<(std::ostream& os, const NameAuthorIndex& idx) {
         os << idx.data;
@@ -157,12 +196,12 @@ private:
 public:
     KeywordIndex() { data[0] = '\0'; }
 
-    KeywordIndex(const std::string& str) {
+    explicit KeywordIndex(const std::string& str) {
         strncpy(data, str.c_str(), 60);
         data[60] = '\0';
     }
 
-    KeywordIndex(const char* str) {
+    explicit KeywordIndex(const char* str) {
         if (str) {
             strncpy(data, str, 60);
             data[60] = '\0';
@@ -186,6 +225,18 @@ public:
         return strcmp(data, other.data) != 0;
     }
 
+    bool operator<=(const KeywordIndex& other) const {
+        return strcmp(data, other.data) <= 0;
+    }
+
+    bool operator>(const KeywordIndex& other) const {
+        return strcmp(data, other.data) > 0;
+    }
+
+    bool operator>=(const KeywordIndex& other) const {
+        return strcmp(data, other.data) >= 0;
+    }
+
     bool empty() const { return data[0] == '\0'; }
 
     friend std::ostream& operator<<(std::ostream& os, const KeywordIndex& idx) {
@@ -205,16 +256,16 @@ private:
         double income;
         double expense;
         FinanceRecord() : income(0), expense(0) {}
-        FinanceRecord(double inc, double exp) : income(inc), expense(exp) {}
+        FinanceRecord(const double inc, const double exp) : income(inc), expense(exp) {}
     };
 
     std::vector<FinanceRecord> financeRecords;
 
-    bool isValidISBNStr(const std::string& isbn) const;
-    bool isValidBookNameStr(const std::string& name) const;
-    bool isValidAuthorStr(const std::string& author) const;
+    static bool isValidISBNStr(const std::string& isbn);
+    static bool isValidBookNameStr(const std::string& name);
+    static bool isValidAuthorStr(const std::string& author);
     bool isValidKeywordsStr(const std::string& keywords) const;
-    bool isValidPriceStr(const std::string& priceStr) const;
+    static bool isValidPriceStr(const std::string& priceStr);
     bool isValidQuantityStr(const std::string& quantityStr) const;
 
     void updateIndices(const BookData& oldBook, const BookData& newBook);
@@ -223,6 +274,8 @@ private:
     std::vector<std::string> splitKeywords(const std::string& keywords) const;
 
     std::vector<BookData> getAllBooksFromMap() const;
+public:
+    explicit BookSystem(const std::string& baseFileName);
     //图书指令
     bool showBooks(const std::string& type, const std::string& value);
     bool buyBook(const std::string& isbnStr, long long quantity, double& total);
@@ -253,6 +306,7 @@ private:
     int getFinanceRecordCount() const { return financeRecords.size(); }
 
     static std::string formatDouble(double value);
+
 };
 
 

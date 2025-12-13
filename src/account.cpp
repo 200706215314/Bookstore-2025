@@ -1,7 +1,7 @@
 #include "../include/account.h"
 
 int Account::getPrivilege() const {
-    return previlege_;
+    return privilege_;
 }
 
 std::string Account::getUserID() const {

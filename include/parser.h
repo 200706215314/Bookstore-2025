@@ -36,6 +36,12 @@ public:
     static bool validateQuotedParam(const std::string& param, const std::string& prefix);
 
     static bool validatePriceParam(const std::string& param);
+
+    static bool validateQuantityParam(const std::string& param);
+    static bool validatePrivilegeParam(const std::string& param);
+    static bool validateUserIDParam(const std::string& param);
+    static bool validatePasswordParam(const std::string& param);
+    static bool validateUsernameParam(const std::string& param);
 };
 
 #endif //BOOKSTORE_2025_PARSER_H
