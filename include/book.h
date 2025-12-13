@@ -14,9 +14,8 @@ private:
     char ISBN[21];
     char BookName[61];
     char Author[61];
-    char keywird[61];
+    char Keywords[61];
     double Price;
-    double TotalCost;
     long long Stock;
 
 public:
@@ -48,6 +47,8 @@ public:
     bool isValid() const;
     bool hasKeyword(const std::string& keyword) const;
 
+    std::vector<std::string> getAllKeywords() const;
+
     std::string toString() const;
 
     bool operator<(const BookData& other) const {
@@ -57,9 +58,7 @@ public:
         return strcmp(ISBN, other.ISBN) == 0;
     }
 
-    // friend std::ostream operator<<(std::ostream& os, BookData& b) {
-    //
-    // }
+    friend std::ostream& operator<<(std::ostream& os, const BookData& book);
 };
 
 class ISBNIndex {
@@ -194,5 +193,67 @@ public:
         return os;
     }
 };
+
+class BookSystem {
+private:
+    Map<ISBNIndex, BookData> isbnMap;
+    Map<NameAuthorIndex, ISBNIndex> nameIndex;
+    Map<NameAuthorIndex, ISBNIndex> authorIndex;
+    Map<KeywordIndex, ISBNIndex> keywordIndex;
+
+    struct FinanceRecord {
+        double income;
+        double expense;
+        FinanceRecord() : income(0), expense(0) {}
+        FinanceRecord(double inc, double exp) : income(inc), expense(exp) {}
+    };
+
+    std::vector<FinanceRecord> financeRecords;
+
+    bool isValidISBNStr(const std::string& isbn) const;
+    bool isValidBookNameStr(const std::string& name) const;
+    bool isValidAuthorStr(const std::string& author) const;
+    bool isValidKeywordsStr(const std::string& keywords) const;
+    bool isValidPriceStr(const std::string& priceStr) const;
+    bool isValidQuantityStr(const std::string& quantityStr) const;
+
+    void updateIndices(const BookData& oldBook, const BookData& newBook);
+    void addToIndices(const BookData& book);
+    void removeFromIndices(const BookData& book);
+    std::vector<std::string> splitKeywords(const std::string& keywords) const;
+
+    std::vector<BookData> getAllBooksFromMap() const;
+    //图书指令
+    bool showBooks(const std::string& type, const std::string& value);
+    bool buyBook(const std::string& isbnStr, long long quantity, double& total);
+    bool selectBook(const std::string& isbnStr);
+    bool modifyBook(const std::string& selectedISBN,
+                    const std::vector<std::pair<std::string, std::string>>& modifications);
+    bool importBook(const std::string& selectedISBN, long long quantity, double totalCost);
+
+    BookData getBookByISBN(const ISBNIndex& isbn);
+    BookData getBookByISBNStr(const std::string& isbnStr);
+    //查询
+    std::vector<BookData> searchByISBN(const std::string& isbnStr);
+    std::vector<BookData> searchByName(const std::string& name);
+    std::vector<BookData> searchByAuthor(const std::string& author);
+    std::vector<BookData> searchByKeyword(const std::string& keyword);
+    std::vector<BookData> getAllBooks();
+
+    // 创建新书
+    bool createBook(const ISBNIndex& isbn);
+    bool createBookFromStr(const std::string& isbnStr);
+
+    bool bookExists(const ISBNIndex& isbn);
+    bool bookExistsStr(const std::string& isbnStr);
+
+    bool addFinanceRecord(double income, double expense);
+    bool showFinance(int count = -1) const;  // -1表示显示所有
+    std::pair<double, double> getFinanceSummary(int count) const;
+    int getFinanceRecordCount() const { return financeRecords.size(); }
+
+    static std::string formatDouble(double value);
+};
+
 
 #endif //BOOKSTORE_2025_BOOK_H

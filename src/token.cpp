@@ -23,3 +23,7 @@ std::vector<std::string> tokenize(const std::string& s) {
 bool isValidArgument(const std::string &s) {
     return !s.empty();
 }
+
+std::vector<std::string> tokenizeWithQuotes(const std::string &s) {
+
+}
