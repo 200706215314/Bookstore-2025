@@ -119,6 +119,34 @@ std::ostream& operator<<(std::ostream& os, const BookData& book) {
     return os;
 }
 
+bool BookData::hasKeyword(const std::string& keyword) const {
+    if (keyword.empty()) return false;
+
+    std::string keywordsStr = getKeywords();
+    if (keywordsStr.empty()) return false;
+
+    size_t start = 0;
+    size_t end = keywordsStr.find('|');
+
+    while (true) {
+        std::string kw;
+        if (end == std::string::npos) {
+            kw = keywordsStr.substr(start);
+        } else {
+            kw = keywordsStr.substr(start, end - start);
+        }
+
+        if (kw == keyword) return true;
+
+        if (end == std::string::npos) break;
+        start = end + 1;
+        end = keywordsStr.find('|', start);
+    }
+
+    return false;
+}
+
+
 BookSystem::BookSystem(const std::string& baseFileName)
     : isbnMap(baseFileName + "_isbn"),
       nameIndex(baseFileName + "_name"),

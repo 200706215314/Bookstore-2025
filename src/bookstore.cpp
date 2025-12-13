@@ -4,7 +4,7 @@ Bookstore::Bookstore()
     : accountSystem("account_data"),
       bookSystem("book_data") {}
 
-Bookstore::~Bookstore() {}
+Bookstore::~Bookstore() = default;
 
 std::vector<std::string> Bookstore::tokenize(const std::string& input) {
     std::vector<std::string> tokens;
@@ -35,7 +35,6 @@ std::vector<std::string> Bookstore::tokenize(const std::string& input) {
 bool Bookstore::parseShowCommand(const std::vector<std::string>& tokens, 
                                 std::string& type, std::string& value) {
     if (tokens.size() == 1) {
-        // show 不带参数
         type = "";
         value = "";
         return true;
@@ -114,17 +113,14 @@ void Bookstore::run() {
     while (!std::cin.eof()) {
         std::string line;
         std::getline(std::cin, line);
-        
-        // 跳过空行
+
         if (line.empty()) continue;
-        
-        // 处理指令
+
         std::vector<std::string> tokens = tokenize(line);
         if (tokens.empty()) continue;
         
         std::string command = tokens[0];
-        
-        // 处理退出命令
+
         if (command == "quit" || command == "exit") {
             if (tokens.size() != 1) {
                 std::cout << "Invalid\n";
@@ -133,8 +129,7 @@ void Bookstore::run() {
             }
             continue;
         }
-        
-        // 检查权限
+
         int requiredPrivilege = 0;
         if (!checkCommandPrivilege(command, requiredPrivilege)) {
             std::cout << "Invalid\n";
@@ -145,7 +140,6 @@ void Bookstore::run() {
             std::cout << "Invalid\n";
             continue;
         }
-        
         // 处理指令
         if (!processCommand(tokens)) {
             std::cout << "Invalid\n";
@@ -154,7 +148,7 @@ void Bookstore::run() {
 }
 
 bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
-    if (tokens.empty()) return true; // 空指令合法
+    if (tokens.empty()) return true;
     
     std::string command = tokens[0];
     
@@ -177,7 +171,8 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
     try {
         if (command == "su") {
             if (tokens.size() == 2) {
-                return accountSystem.login(tokens[1]);
+                string tmp = "";
+                return accountSystem.login(tokens[1], tmp);
             } else if (tokens.size() == 3) {
                 return accountSystem.login(tokens[1], tokens[2]);
             }
@@ -189,7 +184,6 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
             return accountSystem.registerUser(tokens[1], tokens[2], tokens[3]);
         } else if (command == "passwd") {
             if (tokens.size() == 3) {
-                // 超级管理员模式
                 return accountSystem.changePassword(tokens[1], "", tokens[2]);
             } else if (tokens.size() == 4) {
                 return accountSystem.changePassword(tokens[1], tokens[2], tokens[3]);

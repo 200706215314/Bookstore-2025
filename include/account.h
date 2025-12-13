@@ -177,7 +177,7 @@ public:
     void initialize();
 
     // 账户指令实现
-    bool login(const std::string& userID, const std::string& password = "");
+    bool login(const std::string& userID, const std::string& password );
     bool logout();
     bool registerUser(const std::string& userID, const std::string& password,
                       const std::string& username);
