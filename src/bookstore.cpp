@@ -123,7 +123,7 @@ void Bookstore::run() {
 
         if (command == "quit" || command == "exit") {
             if (tokens.size() != 1) {
-                std::cout << "Invalid\n";
+                std::cout << "Invalid" << std::endl;
             } else {
                 break;
             }
@@ -132,17 +132,17 @@ void Bookstore::run() {
 
         int requiredPrivilege = 0;
         if (!checkCommandPrivilege(command, requiredPrivilege)) {
-            std::cout << "Invalid\n";
+            std::cout << "Invalid" << std::endl;
             continue;
         }
         
         if (!accountSystem.hasPrivilege(requiredPrivilege)) {
-            std::cout << "Invalid\n";
+            std::cout << "Invalid" << std::endl;
             continue;
         }
         // 处理指令
         if (!processCommand(tokens)) {
-            std::cout << "Invalid\n";
+            std::cout << "Invalid" << std::endl;
         }
     }
 }
