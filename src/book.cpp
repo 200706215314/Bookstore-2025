@@ -696,6 +696,7 @@ bool BookSystem::addFinanceRecord(double income, double expense) {
 }
 
 bool BookSystem::showFinance(int count) const {
+    // std::cerr << "test2  ";
     int totalRecords = financeRecords.size();
 
     if (count == 0) {
@@ -704,6 +705,7 @@ bool BookSystem::showFinance(int count) const {
     }
 
     if (count > totalRecords && count != -1) {
+        // std::cerr << "test1";
         return false;
     }
 
@@ -759,16 +761,5 @@ std::string BookSystem::formatDouble(double value) {
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << value;
     std::string result = oss.str();
-
-    size_t dotPos = result.find('.');
-    if (dotPos != std::string::npos) {
-        while (result.back() == '0') {
-            result.pop_back();
-        }
-        if (result.back() == '.') {
-            result.pop_back();
-        }
-    }
-
     return result;
 }

@@ -152,14 +152,19 @@ bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
     if (tokens.empty()) return true;
     
     std::string command = tokens[0];
+    std::string command_;
+    if (tokens.size() >= 2) {
+        command_ = tokens[1];
+    }
+
     
     if (command == "su" || command == "logout" || command == "register" ||
         command == "passwd" || command == "useradd" || command == "delete") {
         return handleAccountCommand(tokens);
-    } else if (command == "show" || command == "buy" || command == "select" ||
+    } else if ((command == "show" && command_ != "finance" )|| command == "buy" || command == "select" ||
                command == "modify" || command == "import") {
         return handleBookCommand(tokens);
-    } else if (command == "show finance") {
+    } else if (command == "show" && command_ == "finance") {
         return handleFinanceCommand(tokens);
     }
     
@@ -262,21 +267,35 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
 }
 
 bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
-    if (tokens[0] != "show" || tokens.size() < 2) return false;
+    // std::cerr << "test3 ";
+    if (tokens[0] != "show" || tokens.size() < 2) {
+        // std::cerr << "test4  ";
+        return false;
+    }
     
     std::string subcommand = tokens[1];
-    if (subcommand != "finance") return false;
+    if (subcommand != "finance") {
+        // std::cerr << "test5  ";
+        return false;
+    }
     
     if (tokens.size() == 2) {
         // show finance
+        // std::cerr << "test 6  ";
         return bookSystem.showFinance(-1);
     } else if (tokens.size() == 3) {
         // show finance [Count]
+        // std::cerr << " test 7";
         try {
             int count = std::stoi(tokens[2]);
-            if (count < 0) return false;
+            // std::cerr << "test8 ";
+            if (count < 0) {
+                // std::cerr << "test 9  ";
+                return false;
+            }
             return bookSystem.showFinance(count);
         } catch (...) {
+            // std::cerr << "test 10  ";
             return false;
         }
     }
