@@ -107,17 +107,19 @@ bool AccountSystem::login(const std::string& userID, const std::string& password
         if (loginStack.empty() || getCurrentPrivilege() <= tmp.getPrivilege()) {
             return false;
         }
+        loginStack.push_back(LoginInfo(tmp));
+        return true;
     }
-
-    if (!isValidPassword(password)) {
-        return false;
+    else {
+        if (!isValidPassword(password)) {
+            return false;
+        }
+        if (tmp.getPassword() != password) {
+            return false;
+        }
+        loginStack.push_back(LoginInfo(tmp));
+        return true;
     }
-    if (tmp.getPassword() != password) {
-        return false;
-    }
-
-    loginStack.push_back(LoginInfo(tmp));
-    return true;
 }
 bool AccountSystem::logout() {
     if (loginStack.empty()) {
@@ -268,5 +270,13 @@ bool AccountSystem::isUserLoggedIn(const std::string& userID) const {
 
 bool AccountSystem::hasPrivilege(const int required) const {
     return checkPrivilege(required);
+}
+
+void AccountSystem::updateSelectedISBNForAll(const std::string& oldISBN, const std::string& newISBN) {
+    for (auto& loginInfo : loginStack) {
+        if (loginInfo.getSelectedISBN() == oldISBN) {
+            loginInfo.setSelectedISBN(newISBN);
+        }
+    }
 }
 

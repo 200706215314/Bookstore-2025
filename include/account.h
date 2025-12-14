@@ -206,5 +206,6 @@ public:
 
     bool hasPrivilege(int required) const;
 
+    void updateSelectedISBNForAll(const std::string& oldISBN, const std::string& newISBN);
 };
 #endif //BOOKSTORE_2025_ACCOUNT_H
