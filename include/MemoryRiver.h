@@ -13,7 +13,7 @@ template<class T, int info_len = 4>
 class MemoryRiver {
 private:
     /* your code here */
-    fstream file;
+    mutable fstream file;
     string file_name;
     int sizeofT = sizeof(T);
 public:
@@ -73,7 +73,7 @@ public:
     }
 
     //读出位置索引index对应的T对象的值并赋值给t，保证调用的index都是由write函数产生
-    void read(T &t, const int index) {
+    void read(T &t, const int index) const{
         /* your code here */
         file.open(file_name,std::ios::in);
         file.seekg(index, std::ios::beg);

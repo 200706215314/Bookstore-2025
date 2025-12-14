@@ -288,7 +288,7 @@ public:
         }
     }
 
-    std::vector<ValueType> find(const KeyType &index) {
+    std::vector<ValueType> find(const KeyType &index) const{
         std::vector<ValueType> values;
 
         if (head != -1) {
@@ -317,7 +317,7 @@ public:
         return values;
     }
 
-    void findAndPrint(const KeyType &index) {
+    void findAndPrint(const KeyType &index) const{
         std::vector<ValueType> values = find(index);
 
         if (values.empty()) {
@@ -333,6 +333,28 @@ public:
 
     int getHead() const { return head; }
     int getBlockCount() const { return blockCount; }
+
+    std::vector<ValueType> getAllValues() const{
+        std::vector<ValueType> result;
+
+        if (head == -1) return result;
+
+        int current = head;
+        Block block;
+
+        while (current != -1) {
+            blockFile.read(block, current);
+
+            for (int i = 0; i < block.count; i++) {
+                result.push_back(block.data[i].value);
+            }
+
+            current = block.next;
+        }
+
+        std::sort(result.begin(), result.end());
+        return result;
+    }
 };
 
 #endif //BOOKSTORE_2025_MAP_H

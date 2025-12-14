@@ -142,7 +142,8 @@ void Bookstore::run() {
         }
         // 处理指令
         if (!processCommand(tokens)) {
-            std::cout << "Invalid" << std::endl;
+            std::cout << "Invalid\n";
+            // std::cout << "Invalid" << std::endl;
         }
     }
 }

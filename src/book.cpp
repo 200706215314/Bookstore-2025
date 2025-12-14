@@ -412,11 +412,8 @@ ISBNIndex isbn(oldBook.getISBN());
 
 
 std::vector<BookData> BookSystem::getAllBooksFromMap() const {
-    std::vector<BookData> allBooks;
-
-    // 这里需要一个遍历Map的方法
-    // 暂时返回空向量，需要根据实际情况实现
-    return allBooks;
+    // 直接使用 Map 的遍历功能
+    return isbnMap.getAllValues();
 }
 
 bool BookSystem::showBooks(const std::string& type, const std::string& value) {  //param_type  param_value
@@ -425,6 +422,7 @@ bool BookSystem::showBooks(const std::string& type, const std::string& value) { 
     if (type.empty()) {
         results = getAllBooks();
     } else if (type == "ISBN") {
+        std::cerr << "test1  " << value;
         results = searchByISBN(value);
     } else if (type == "name") {
         results = searchByName(value);
@@ -437,6 +435,11 @@ bool BookSystem::showBooks(const std::string& type, const std::string& value) { 
     }
 
     std::sort(results.begin(), results.end());   // 按ISBN排序
+
+    for (auto i : results) {
+        std::cerr << "test2" << "  ";
+        std::cerr << i;
+    }
 
     if (results.empty()) {
         std::cout << "\n";

@@ -1,4 +1,5 @@
 #include "../include/parser.h"
+#include "../include/token.h"
 #include <algorithm>
 #include <cctype>
 #include <regex>
@@ -119,38 +120,30 @@ std::string CommandParser::getParameterValue(const std::string& param) {
 }
 
 std::vector<std::string> CommandParser::splitKeywords(const std::string& keywords) {
-    std::vector<std::string> res;
-    std::string content;
-    if (keywords.find('\"') != std::string::npos) {
-        content = extractQuotedContent(keywords);
-    }
-    else {
-        content = keywords;
-    }
+    std::vector<std::string> result;
+    if (keywords.empty()) return result;
 
     size_t start = 0;
-    size_t end = content.find('|');
+    size_t end = keywords.find('|');
+
     while (true) {
         std::string kw;
         if (end == std::string::npos) {
-            kw = content.substr(start);
+            kw = keywords.substr(start);
         } else {
-            kw = content.substr(start, end - start);
+            kw = keywords.substr(start, end - start);
         }
 
-        while (!kw.empty() && std::isspace(kw.front())) kw.erase(0, 1);
-        while (!kw.empty() && std::isspace(kw.back())) kw.pop_back();
-
         if (!kw.empty()) {
-            res.push_back(kw);
+            result.push_back(kw);
         }
 
         if (end == std::string::npos) break;
         start = end + 1;
-        end = content.find('|', start);
+        end = keywords.find('|', start);
     }
 
-    return res;
+    return result;
 }
 
 bool CommandParser::parseShowCommand(const std::vector<std::string>& tokens,
@@ -170,9 +163,15 @@ bool CommandParser::parseShowCommand(const std::vector<std::string>& tokens,
     }
 
     type = getParameterType(param);
-    value = getParameterValue(param);
 
     if (value.empty()) return false;
+
+    if (type == "name" || type == "author" || type == "keyword") {
+        parse_argument(param, type, value);
+    }
+    if (type == "ISBN" || type == "price") {
+        parse_single_argument(param, type, value);
+    }
 
     if (type == "keyword") {
         const std::vector<std::string> keywords = splitKeywords(param);
