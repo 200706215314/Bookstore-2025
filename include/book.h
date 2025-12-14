@@ -11,6 +11,7 @@
 
 class BookData {
 private:
+    int book_id;
     char ISBN[21];
     char BookName[61];
     char Author[61];
@@ -261,6 +262,8 @@ private:
 
     std::vector<FinanceRecord> financeRecords;
 
+public:
+    explicit BookSystem(const std::string& baseFileName);
     static bool isValidISBNStr(const std::string& isbn);
     static bool isValidBookNameStr(const std::string& name);
     static bool isValidAuthorStr(const std::string& author);
@@ -274,8 +277,6 @@ private:
     std::vector<std::string> splitKeywords(const std::string& keywords) const;
 
     std::vector<BookData> getAllBooksFromMap() const;
-public:
-    explicit BookSystem(const std::string& baseFileName);
     //图书指令
     bool showBooks(const std::string& type, const std::string& value);
     bool buyBook(const std::string& isbnStr, long long quantity, double& total);

@@ -11,6 +11,8 @@
 #include "account.h"
 #include "book.h"
 #include "parser.h"
+#include "token.h"
+
 
 class Bookstore {
 private:

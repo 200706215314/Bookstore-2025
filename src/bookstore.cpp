@@ -206,7 +206,9 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
 
 bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
     std::string command = tokens[0];
-    
+    // for (auto i : tokens) {
+    //     std::cerr << i << " ";
+    // }
     try {
         if (command == "show") {
             std::string type, value;
@@ -230,15 +232,27 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             return success;
         } else if (command == "modify") {
             std::vector<std::pair<std::string, std::string>> modifications;
-            if (!parseModifyCommand(tokens, modifications)) return false;
-            std::string selectedISBN = accountSystem.getSelectedISBN();
-            return bookSystem.modifyBook(selectedISBN, modifications);
+            if (!parseModifyCommand(tokens, modifications)) {
+                // std::cerr << "  test1  \n";
+                return false;
+            }
+            std::string selected_ISBN = accountSystem.getSelectedISBN();
+            for (const auto& mod : modifications) {
+                if (mod.first != "ISBN") {
+                    continue;
+                }
+                accountSystem.loginStack.back().clearSelectedISBN();
+                accountSystem.loginStack.back().setSelectedISBN(mod.second);
+            }
+
+            // std::cerr << "  test2  \n";
+            return bookSystem.modifyBook(selected_ISBN, modifications);
         } else if (command == "import") {
             if (tokens.size() != 3) return false;
             long long quantity = std::stoll(tokens[1]);
             double totalCost = std::stod(tokens[2]);
-            std::string selectedISBN = accountSystem.getSelectedISBN();
-            return bookSystem.importBook(selectedISBN, quantity, totalCost);
+            std::string selected_ISBN = accountSystem.getSelectedISBN();
+            return bookSystem.importBook(selected_ISBN, quantity, totalCost);
         }
     } catch (...) {
         return false;

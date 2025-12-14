@@ -193,11 +193,18 @@ bool CommandParser::parseModifyCommand(const std::vector<std::string>& tokens,
         std::string param = tokens[i];
 
         if (!validateParameterFormat(param)) {
+            // std::cerr << 1;
             return false;
         }
 
         std::string type = getParameterType(param);
-        std::string value = getParameterValue(param);
+        std::string value;
+        if (type == "name" || type == "author" || type == "keyword") {
+            parse_argument(param, type, value);
+        }
+        if (type == "ISBN" || type == "price") {
+            parse_single_argument(param, type, value);
+        }
 
         if (value.empty()) return false;
 
@@ -221,7 +228,7 @@ bool CommandParser::parseModifyCommand(const std::vector<std::string>& tokens,
             modifications.emplace_back("keyword", value);
             paramTypes[3] = true;
 
-            std::vector<std::string> keywords = splitKeywords(param);
+            std::vector<std::string> keywords = splitKeywords(value);
             std::sort(keywords.begin(), keywords.end());
             for (size_t j = 1; j < keywords.size(); j++) {
                 if (keywords[j] == keywords[j-1]) {

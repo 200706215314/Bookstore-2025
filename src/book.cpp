@@ -422,7 +422,7 @@ bool BookSystem::showBooks(const std::string& type, const std::string& value) { 
     if (type.empty()) {
         results = getAllBooks();
     } else if (type == "ISBN") {
-        std::cerr << "test1  " << value;
+        // std::cerr << "test1  " << value;
         results = searchByISBN(value);
     } else if (type == "name") {
         results = searchByName(value);
@@ -436,10 +436,10 @@ bool BookSystem::showBooks(const std::string& type, const std::string& value) { 
 
     std::sort(results.begin(), results.end());   // 按ISBN排序
 
-    for (auto i : results) {
-        std::cerr << "test2" << "  ";
-        std::cerr << i;
-    }
+    // for (auto i : results) {
+    //     std::cerr << "test2" << "  ";
+    //     std::cerr << i;
+    // }
 
     if (results.empty()) {
         std::cout << "\n";
@@ -488,7 +488,11 @@ bool BookSystem::selectBook(const std::string& isbnStr) {
 
 bool BookSystem::modifyBook(const std::string& selectedISBN,
                            const std::vector<std::pair<std::string, std::string>>& modifications) {  //pair<std::string, std::string> param_type  param_value
-    if (selectedISBN.empty() || !bookExistsStr(selectedISBN)) return false;
+    // std::cerr << selectedISBN << "  " << bookExistsStr(selectedISBN);
+    if (selectedISBN.empty() || !bookExistsStr(selectedISBN)) {
+        // std::cerr << "  test3  \n";
+        return false;
+    }
 
     BookData originalBook = getBookByISBNStr(selectedISBN);
     BookData modifiedBook = originalBook;
@@ -514,12 +518,16 @@ bool BookSystem::modifyBook(const std::string& selectedISBN,
 
             modifiedBook.setISBN(value);
             newISBN = value;
+
             isbnModified = true;
         }
         else if (type == "name") {
             if (nameModified) return false;
+            // std::cerr << "  test4  \n";
             if (!isValidBookNameStr(value)) return false;
+            // std::cerr << "  test5  \n";
             modifiedBook.setBookName(value);
+            // std::cerr << "  test6  \n";
             nameModified = true;
         }
         else if (type == "author") {
@@ -548,6 +556,7 @@ bool BookSystem::modifyBook(const std::string& selectedISBN,
 
     if (!isbnModified && !nameModified && !authorModified &&
         !keywordsModified && !priceModified) {
+        // std::cerr << "  test7  \n";
         return false;
     }
 
@@ -555,6 +564,8 @@ bool BookSystem::modifyBook(const std::string& selectedISBN,
 
     ISBNIndex oldIsbn(originalISBN);
     ISBNIndex newIsbn(newISBN);
+
+    // std::cerr << "  test8  \n";
 
     if (isbnModified) {
         isbnMap.remove(oldIsbn, originalBook);

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "map.h"
 #include "MemoryRiver.h"
+#include "book.h"
 
 constexpr int MAX_INDEX_LEN = 31;
 
@@ -152,6 +153,7 @@ public:
 };
 
 class AccountSystem {
+    friend class Bookstore;
 private:
     Map<CharIndex, Account> accountMap;
     std::vector<LoginInfo> loginStack;
