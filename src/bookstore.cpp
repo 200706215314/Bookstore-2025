@@ -88,26 +88,29 @@ bool Bookstore::parseModifyCommand(const std::vector<std::string>& tokens,
     return true;
 }
 
-bool Bookstore::checkCommandPrivilege(const std::string& command, int& requiredPrivilege) {
-    // 根据标准要求设置权限
+    bool Bookstore::checkCommandPrivilege(const std::string& command, const std::string& command_, int& requiredPrivilege) {
     if (command == "su" || command == "register") {
         requiredPrivilege = 0;
-    } else if (command == "logout" || command == "passwd" || 
-               command == "show" || command == "buy") {
+    }
+    else if (command == "logout" || command == "passwd" ||
+               (command == "show" && command_ != "finance") || command == "buy") {
         requiredPrivilege = 1;
-    } else if (command == "useradd" || command == "select" || 
-               command == "modify" || command == "import") {
-        requiredPrivilege = 3;
-    } else if (command == "delete" || command == "show finance" || 
-               command == "log" || command == "report finance" || 
-               command == "report employee") {
-        requiredPrivilege = 7;
-    } else {
+               }
+    else if (command == "useradd" || command == "select" ||
+                          command == "modify" || command == "import") {
+                   requiredPrivilege = 3;
+                          }
+    else if (command == "delete" || command == "show finance" ||
+                                     command == "log" || (command == "show" && command_ == "finance") ||
+                                     command == "report employee") {
+                              requiredPrivilege = 7;
+                                     }
+    else {
         return false;
     }
-    
+
     return true;
-}
+    }
 
 void Bookstore::run() {
     while (!std::cin.eof()) {
@@ -120,6 +123,10 @@ void Bookstore::run() {
         if (tokens.empty()) continue;
         
         std::string command = tokens[0];
+        std::string command_ = "";
+        if (tokens.size() >= 2) {
+            command_ = tokens[1];
+        }
 
         if (command == "quit" || command == "exit") {
             if (tokens.size() != 1) {
@@ -131,7 +138,7 @@ void Bookstore::run() {
         }
 
         int requiredPrivilege = 0;
-        if (!checkCommandPrivilege(command, requiredPrivilege)) {
+        if (!checkCommandPrivilege(command, command_, requiredPrivilege)) {
             std::cout << "Invalid" << std::endl;
             continue;
         }
@@ -152,7 +159,7 @@ bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
     if (tokens.empty()) return true;
     
     std::string command = tokens[0];
-    std::string command_;
+    std::string command_ = "";
     if (tokens.size() >= 2) {
         command_ = tokens[1];
     }

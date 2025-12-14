@@ -728,7 +728,7 @@ bool BookSystem::showFinance(int count) const {
     }
 
     std::cout << "+ " << formatDouble(totalIncome)
-              << " - " << formatDouble(totalExpense) << "\n";
+          << " - " << formatDouble(totalExpense) << "\n";
 
     return true;
 }

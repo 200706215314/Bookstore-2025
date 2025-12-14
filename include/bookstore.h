@@ -27,7 +27,7 @@ private:
     bool parseModifyCommand(const std::vector<std::string>& tokens,
                            std::vector<std::pair<std::string, std::string>>& modifications);
 
-    bool checkCommandPrivilege(const std::string& command, int& requiredPrivilege);
+    bool checkCommandPrivilege(const std::string& command, const std::string& command_, int& requiredPrivilege);
 
 public:
     Bookstore();

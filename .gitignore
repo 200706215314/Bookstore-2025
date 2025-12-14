@@ -11,12 +11,15 @@ cmake-build-debug
 
 # testcases
 testcase/**
+testcases/**
 
 # download files
 bonus.md
 README.md
 业务要求.md
 标准要求.md
+tests.md
+tests.pdf
 
 # storage files
 
