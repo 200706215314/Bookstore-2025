@@ -151,7 +151,8 @@ BookSystem::BookSystem(const std::string& baseFileName)
     : isbnMap(baseFileName + "_isbn"),
       nameIndex(baseFileName + "_name"),
       authorIndex(baseFileName + "_author"),
-      keywordIndex(baseFileName + "_keyword") {};
+      keywordIndex(baseFileName + "_keyword") ,
+      financeSystem(baseFileName) {};
 
 bool BookSystem::isValidISBNStr(const std::string& isbn) {
     if (isbn.empty() || isbn.length() > 20) return false;
@@ -463,11 +464,9 @@ bool BookSystem::buyBook(const std::string& isbnStr, long long quantity, double&
 
     book.decreaseStock(quantity);
 
-    // 更新图书信息
     ISBNIndex isbn(isbnStr);
     isbnMap.remove(isbn, book);
     isbnMap.insert(isbn, book);
-
 
     addFinanceRecord(total, 0.0);
 
@@ -688,24 +687,31 @@ bool BookSystem::bookExistsStr(const std::string& isbnStr) {
     return bookExists(isbn);
 }
 
-bool BookSystem::addFinanceRecord(double income, double expense) {
-    if (income < 0 || expense < 0) return false;
 
-    financeRecords.push_back(FinanceRecord(income, expense));
-    return true;
+
+FinanceSystem::FinanceSystem(const std::string& baseFileName)
+    : financeMap(baseFileName + "_finance") {
+        std::vector<FinanceRecord> allRecords = financeMap.getAllValues();
+        transactionCount = allRecords.size();
 }
 
-bool BookSystem::showFinance(int count) const {
-    // std::cerr << "test2  ";
-    int totalRecords = financeRecords.size();
+bool FinanceSystem::addFinanceRecord(double income, double expense) {
+    if (income < 0 || expense < 0) return false;
+    FinanceRecord record(income, expense);
+    int transactionId = transactionCount + 1;
+    financeMap.insert(transactionId, record);
+    transactionCount = transactionId;
+    return true;
 
+}
+
+bool FinanceSystem::showFinance(int count) const {
     if (count == 0) {
         std::cout << "\n";
         return true;
     }
 
-    if (count > totalRecords && count != -1) {
-        // std::cerr << "test1";
+    if (count > transactionCount && count != -1) {
         return false;
     }
 
@@ -713,51 +719,66 @@ bool BookSystem::showFinance(int count) const {
     double totalExpense = 0.0;
 
     if (count == -1) {
-        for (const auto& record : financeRecords) {
-            totalIncome += record.income;
-            totalExpense += record.expense;
+        for (int i = 1; i <= transactionCount; i++) {
+            std::vector<FinanceRecord> records = financeMap.find(i);
+            if (!records.empty()) {
+                totalIncome += records[0].income;
+                totalExpense += records[0].expense;
+            }
         }
     } else {
-        int start = totalRecords - count;
-        if (start < 0) start = 0;
+        int start = transactionCount - count + 1;
+        if (start < 1) start = 1;
 
-        for (int i = start; i < totalRecords; i++) {
-            totalIncome += financeRecords[i].income;
-            totalExpense += financeRecords[i].expense;
+        for (int i = start; i <= transactionCount; i++) {
+            std::vector<FinanceRecord> records = financeMap.find(i);
+            if (!records.empty()) {
+                totalIncome += records[0].income;
+                totalExpense += records[0].expense;
+            }
         }
     }
 
     std::cout << "+ " << formatDouble(totalIncome)
-          << " - " << formatDouble(totalExpense) << "\n";
+              << " - " << formatDouble(totalExpense) << "\n";
 
     return true;
 }
 
-std::pair<double, double> BookSystem::getFinanceSummary(int count) const {
+std::pair<double, double> FinanceSystem::getFinanceSummary(int count) const {
     double totalIncome = 0.0;
     double totalExpense = 0.0;
 
-    int totalRecords = financeRecords.size();
-
-    if (count == -1 || count >= totalRecords) {
-        for (const auto& record : financeRecords) {
-            totalIncome += record.income;
-            totalExpense += record.expense;
+    if (count == -1 || count >= transactionCount) {
+        for (int i = 1; i <= transactionCount; i++) {
+            std::vector<FinanceRecord> records = financeMap.find(i);
+            if (!records.empty()) {
+                totalIncome += records[0].income;
+                totalExpense += records[0].expense;
+            }
         }
     } else {
-        int start = totalRecords - count;
-        if (start < 0) start = 0;
+        int start = transactionCount - count + 1;
+        if (start < 1) start = 1;
 
-        for (int i = start; i < totalRecords; i++) {
-            totalIncome += financeRecords[i].income;
-            totalExpense += financeRecords[i].expense;
+        for (int i = start; i <= transactionCount; i++) {
+            std::vector<FinanceRecord> records = financeMap.find(i);
+            if (!records.empty()) {
+                totalIncome += records[0].income;
+                totalExpense += records[0].expense;
+            }
         }
     }
 
     return {totalIncome, totalExpense};
 }
 
-std::string BookSystem::formatDouble(double value) {
+void FinanceSystem::updateTransactionCount() {
+    std::vector<FinanceRecord> allRecords = financeMap.getAllValues();
+    transactionCount = allRecords.size();
+}
+
+std::string FinanceSystem::formatDouble(double value) {
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << value;
     std::string result = oss.str();

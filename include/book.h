@@ -246,6 +246,50 @@ public:
     }
 };
 
+struct FinanceRecord {
+    double income;
+    double expense;
+
+    FinanceRecord() : income(0.0), expense(0.0) {}
+    FinanceRecord(double inc, double exp) : income(inc), expense(exp) {}
+
+    bool operator<(const FinanceRecord& other) const {
+        if (income != other.income) return income < other.income;
+        return expense < other.expense;
+    }
+
+    bool operator==(const FinanceRecord& other) const {
+        return income == other.income && expense == other.expense;
+    }
+};
+
+class FinanceSystem {
+private:
+    Map<int, FinanceRecord> financeMap;  // 使用Map存储财务记录
+    int transactionCount;                // 交易总数
+
+public:
+    explicit FinanceSystem(const std::string& baseFileName);
+
+    // 添加
+    bool addFinanceRecord(double income, double expense);
+
+    // 显示财务摘要
+    bool showFinance(int count = -1) const;
+
+    // 获取财务摘要
+    std::pair<double, double> getFinanceSummary(int count) const;
+
+    // 获取记录数量
+    int getRecordCount() const { return transactionCount; }
+
+    static std::string formatDouble(double value);
+
+private:
+    // 更新交易计数
+    void updateTransactionCount();
+};
+
 class BookSystem {
 private:
     Map<ISBNIndex, BookData> isbnMap;
@@ -253,14 +297,7 @@ private:
     Map<NameAuthorIndex, ISBNIndex> authorIndex;
     Map<KeywordIndex, ISBNIndex> keywordIndex;
 
-    struct FinanceRecord {
-        double income;
-        double expense;
-        FinanceRecord() : income(0), expense(0) {}
-        FinanceRecord(const double inc, const double exp) : income(inc), expense(exp) {}
-    };
-
-    std::vector<FinanceRecord> financeRecords;
+    FinanceSystem financeSystem;
 
 public:
     explicit BookSystem(const std::string& baseFileName);
@@ -301,12 +338,25 @@ public:
     bool bookExists(const ISBNIndex& isbn);
     bool bookExistsStr(const std::string& isbnStr);
 
-    bool addFinanceRecord(double income, double expense);
-    bool showFinance(int count = -1) const;  // -1表示显示所有
-    std::pair<double, double> getFinanceSummary(int count) const;
-    int getFinanceRecordCount() const { return financeRecords.size(); }
+    bool addFinanceRecord(double income, double expense) {
+        return financeSystem.addFinanceRecord(income, expense);
+    }
 
-    static std::string formatDouble(double value);
+    bool showFinance(int count = -1) const {
+        return financeSystem.showFinance(count);
+    }
+
+    std::pair<double, double> getFinanceSummary(int count) const {
+        return financeSystem.getFinanceSummary(count);
+    }
+
+    int getFinanceRecordCount() const {
+        return financeSystem.getRecordCount();
+    }
+
+    static std::string formatDouble(double value) {
+        return FinanceSystem::formatDouble(value);
+    }
 
 };
 
