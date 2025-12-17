@@ -258,7 +258,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
         } else if (command == "select") {
             // exit(1);
             if (tokens.size() != 2) return false;
-            if (tokens.size() != 2) return false;
+            if (tokens[1].empty()) return false;
             bool success = bookSystem.selectBook(tokens[1]);
             if (success) {
                 accountSystem.selectBook(tokens[1]);
