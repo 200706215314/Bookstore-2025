@@ -182,6 +182,7 @@ bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
         return handleAccountCommand(tokens);
     } else if ((command == "show" && command_ != "finance" )|| command == "buy" || command == "select" ||
                command == "modify" || command == "import") {
+        // std::cerr << "test3" << handleBookCommand(tokens) << std::endl;
         return handleBookCommand(tokens);
     } else if (command == "show" && command_ == "finance") {
         return handleFinanceCommand(tokens);
@@ -257,7 +258,11 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             return success;
         } else if (command == "select") {
             // exit(1);
-            if (tokens.size() != 2) return false;
+            // std::cerr << "test1  " << tokens.size()  << std::endl;
+            if (tokens.size() != 2) {
+                // std::cerr << "test2  "<< std::endl;
+                return false;
+            }
             const std::string& isbn = tokens[1];
             if (isbn.empty()) return false;  // ISBN不能为空
             // 检查ISBN格式
