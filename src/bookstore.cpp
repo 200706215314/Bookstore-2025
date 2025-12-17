@@ -106,6 +106,7 @@ bool Bookstore::parseModifyCommand(const std::vector<std::string>& tokens,
         requiredPrivilege = 1;
     }
     else if (command == "show") {
+        exit(1);
         if (subcommand == "finance") {
             requiredPrivilege = 7;
         } else {
