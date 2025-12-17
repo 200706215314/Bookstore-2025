@@ -106,7 +106,7 @@ bool Bookstore::parseModifyCommand(const std::vector<std::string>& tokens,
         requiredPrivilege = 1;
     }
     else if (command == "show") {
-        exit(1);
+        // exit(1);
         if (subcommand == "finance") {
             requiredPrivilege = 7;
         } else {
@@ -195,6 +195,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
     
     try {
         if (command == "su") {
+            exit(1);
             if (tokens.size() == 2) {
                 string tmp = "";
                 return accountSystem.login(tokens[1], tmp);
