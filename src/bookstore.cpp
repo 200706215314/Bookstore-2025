@@ -282,7 +282,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             }
             return success;
         } else if (command == "modify") {
-            exit(1);
+            // exit(1);
             std::vector<std::pair<std::string, std::string>> modifications;
             if (!parseModifyCommand(tokens, modifications)) {
                 return false;
@@ -306,6 +306,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
 
             return success;
         } else if (command == "import") {
+            exit(1);
             if (tokens.size() != 3) return false;
             long long quantity = std::stoll(tokens[1]);
             double totalCost = std::stod(tokens[2]);
