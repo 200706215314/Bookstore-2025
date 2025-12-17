@@ -358,6 +358,7 @@ public:
         return FinanceSystem::formatDouble(value);
     }
 
+    bool isValidSingleKeywordStr(const std::string& keyword) const;
 };
 
 

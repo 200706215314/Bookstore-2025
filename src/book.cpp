@@ -435,16 +435,26 @@ std::vector<BookData> BookSystem::getAllBooksFromMap() const {
 bool BookSystem::showBooks(const std::string& type, const std::string& value) {  //param_type  param_value
     std::vector<BookData> results;
 
+
     if (type.empty()) {
         results = getAllBooks();
     } else if (type == "ISBN") {
-        // std::cerr << "test1  " << value;
+        if (value.empty()) return false;  // ISBN不能为空
         results = searchByISBN(value);
     } else if (type == "name") {
+        if (value.empty()) return false;  // 书名不能为空
+        if (!isValidBookNameStr(value)) return false;
         results = searchByName(value);
     } else if (type == "author") {
+        if (value.empty()) return false;  // 作者不能为空
+        if (!isValidAuthorStr(value)) return false;
         results = searchByAuthor(value);
     } else if (type == "keyword") {
+        if (value.empty()) return false;  // 关键词不能为空
+        // show命令只能接受单个关键词，不能包含|
+        if (value.find('|') != std::string::npos) return false;
+        // 验证关键词格式
+        if (!isValidSingleKeywordStr(value)) return false;  // 需要添加这个函数
         results = searchByKeyword(value);
     } else {
         return false;
@@ -452,17 +462,24 @@ bool BookSystem::showBooks(const std::string& type, const std::string& value) { 
 
     std::sort(results.begin(), results.end());   // 按ISBN排序
 
-    // for (auto i : results) {
-    //     std::cerr << "test2" << "  ";
-    //     std::cerr << i;
-    // }
-
     if (results.empty()) {
         std::cout << "\n";
     } else {
         for (const auto& book : results) {
             std::cout << book.toString() << "\n";
         }
+    }
+    return true;
+}
+
+bool BookSystem::isValidSingleKeywordStr(const std::string& keyword) const {
+    if (keyword.empty() || keyword.length() > 60) return false;
+    if (keyword.find('\"') != std::string::npos) return false;  // 不能包含双引号
+    if (keyword.find('|') != std::string::npos) return false;   // 不能包含|符号
+
+    // 检查是否为可见字符
+    for (char c : keyword) {
+        if (c < 32 || c > 126) return false;
     }
     return true;
 }
