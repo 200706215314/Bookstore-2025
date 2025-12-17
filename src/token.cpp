@@ -36,7 +36,7 @@ std::vector<std::string> tokenizeWithQuotes(const std::string &s) {
         if (c == '\"') {
             inQuotes = !inQuotes;
             currentToken += c;
-        } else if ((c == ' ' || c == '\t') && !inQuotes) {
+        } else if (c == ' '  && !inQuotes) {
             if (!currentToken.empty()) {
                 tokens.push_back(currentToken);
                 currentToken.clear();

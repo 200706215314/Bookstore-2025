@@ -105,7 +105,7 @@ bool AccountSystem::login(const std::string& userID, const std::string& password
 
     if (password.empty()) {
         if (loginStack.empty()) return false;
-        if (getCurrentPrivilege() < tmp.getPrivilege()) return false;
+        if (getCurrentPrivilege() <= tmp.getPrivilege()) return false;
         loginStack.push_back(LoginInfo(tmp));
         return true;
     }
