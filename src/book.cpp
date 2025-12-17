@@ -518,9 +518,10 @@ bool BookSystem::selectBook(const std::string& isbnStr) {
     const ISBNIndex isbn(isbnStr);
 
     if (!bookExists(isbn)) {
-        return createBook(isbn);
+        BookData newBook(isbnStr);  // 创建只有ISBN的图书
+        isbnMap.insert(isbn, newBook);
+        return true;  // 总是返回true，因为创建应该成功
     }
-
     return true;
 }
 

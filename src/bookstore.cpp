@@ -258,7 +258,10 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
         } else if (command == "select") {
             // exit(1);
             if (tokens.size() != 2) return false;
-            if (tokens[1].empty()) return false;
+            const std::string& isbn = tokens[1];
+            if (isbn.empty()) return false;  // ISBN不能为空
+            // 检查ISBN格式
+            if (!bookSystem.isValidISBNStr(isbn)) return false;
             bool success = bookSystem.selectBook(tokens[1]);
             if (success) {
                 accountSystem.selectBook(tokens[1]);
