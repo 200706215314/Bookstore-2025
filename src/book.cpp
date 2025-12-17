@@ -155,6 +155,13 @@ BookSystem::BookSystem(const std::string& baseFileName)
       financeSystem(baseFileName) {};
 
 bool BookSystem::isValidISBNStr(const std::string& isbn) {
+    std::string cleanIsbn = isbn;
+
+    // 如果被引号包围，移除引号
+    if (cleanIsbn.size() >= 2 && cleanIsbn.front() == '\"' && cleanIsbn.back() == '\"') {
+        cleanIsbn = cleanIsbn.substr(1, cleanIsbn.size() - 2);
+    }
+
     if (isbn.empty() || isbn.length() > 20) return false;
     for (char c : isbn) {
         if (c < 32 || c > 126) return false; // 不可见字符

@@ -260,16 +260,25 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             // exit(1);
             // std::cerr << "test1  " << tokens.size()  << std::endl;
             if (tokens.size() != 2) {
-                // std::cerr << "test2  "<< std::endl;
                 return false;
             }
+
             const std::string& isbn = tokens[1];
-            if (isbn.empty()) return false;  // ISBN不能为空
+
+            // std::cerr << isbn.empty();
+            // 检查ISBN是否为空
+            if (!isbn.empty()) {
+                return false;
+            }
+
             // 检查ISBN格式
-            if (!bookSystem.isValidISBNStr(isbn)) return false;
-            bool success = bookSystem.selectBook(tokens[1]);
+            if (!bookSystem.isValidISBNStr(isbn)) {
+                return false;
+            }
+            // 调用BookSystem的selectBook
+            bool success = bookSystem.selectBook(isbn);
             if (success) {
-                accountSystem.selectBook(tokens[1]);
+                accountSystem.selectBook(isbn);
             }
             return success;
         } else if (command == "modify") {
