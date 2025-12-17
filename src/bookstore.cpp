@@ -306,12 +306,26 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
 
             return success;
         } else if (command == "import") {
-            exit(1);
+            // exit(1);
             if (tokens.size() != 3) return false;
-            long long quantity = std::stoll(tokens[1]);
-            double totalCost = std::stod(tokens[2]);
             std::string selected_ISBN = accountSystem.getSelectedISBN();
-            return bookSystem.importBook(selected_ISBN, quantity, totalCost);
+            if (selected_ISBN.empty()) {
+                return false;
+            }
+            try {
+                long long quantity = std::stoll(tokens[1]);
+                double totalCost = std::stod(tokens[2]);
+
+                // 验证数量为正整数
+                if (quantity <= 0) return false;
+
+                // 验证总成本为正数
+                if (totalCost <= 0.0) return false;
+
+                return bookSystem.importBook(selected_ISBN, quantity, totalCost);
+            } catch (...) {
+                return false;
+            }
         }
     } catch (...) {
         return false;

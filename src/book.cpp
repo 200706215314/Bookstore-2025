@@ -628,7 +628,7 @@ bool BookSystem::importBook(const std::string& selectedISBN, long long quantity,
     if (selectedISBN.empty() || !bookExistsStr(selectedISBN)) return false;
     if (quantity <= 0 || totalCost <= 0) return false;
 
-    if (totalCost <= 0.0) return false;
+    // if (totalCost <= 0.0) return false;
 
     BookData book = getBookByISBNStr(selectedISBN);
 
