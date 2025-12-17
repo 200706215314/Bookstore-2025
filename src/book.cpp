@@ -229,6 +229,14 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
 
     const size_t dotPos = priceStr.find('.');
     if (dotPos != std::string::npos) {
+        int decimalDigits = priceStr.length() - dotPos - 1;
+        if (decimalDigits > 2) { // 小数位数超过两位 → 非法
+            return false;
+        }
+    }
+
+    const size_t dotPos = priceStr.find('.');
+    if (dotPos != std::string::npos) {
         if (priceStr.length() - dotPos - 1 > 2) return false;
     }
 
