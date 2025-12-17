@@ -267,7 +267,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
 
             // std::cerr << isbn.empty();
             // 检查ISBN是否为空
-            if (!isbn.empty()) {
+            if (isbn.empty()) {
                 return false;
             }
 
@@ -308,20 +308,29 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
         } else if (command == "import") {
             // exit(1);
             if (tokens.size() != 3) return false;
+
+            std::string quantityStr = tokens[1];
+            std::string totalCostStr = tokens[2];
+
+            // 检查是否选中图书
             std::string selected_ISBN = accountSystem.getSelectedISBN();
             if (selected_ISBN.empty()) {
                 return false;
             }
+
+            // 验证 quantity 格式
+            if (!isValidQuantityStr(quantityStr)) {
+                return false;
+            }
+
+            // 验证 totalCost 格式
+            if (!isValidTotalCostStr(totalCostStr)) {
+                return false;
+            }
+
             try {
-                long long quantity = std::stoll(tokens[1]);
-                double totalCost = std::stod(tokens[2]);
-
-                // 验证数量为正整数
-                if (quantity <= 0) return false;
-
-                // 验证总成本为正数
-                if (totalCost <= 0.0) return false;
-
+                long long quantity = std::stoll(quantityStr);
+                double totalCost = std::stod(totalCostStr);
                 return bookSystem.importBook(selected_ISBN, quantity, totalCost);
             } catch (...) {
                 return false;
@@ -385,4 +394,68 @@ bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
     }
     
     return false;
+}
+
+bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
+    if (costStr.empty() || costStr.length() > 13) return false;
+
+    // 检查是否以 '.' 开头或结尾
+    if (costStr[0] == '.' || costStr.back() == '.') {
+        return false;
+    }
+
+    // 检查字符是否合法
+    int dotCount = 0;
+    bool hasDigit = false;
+
+    for (size_t i = 0; i < costStr.length(); i++) {
+        char c = costStr[i];
+        if (c == '.') {
+            dotCount++;
+            if (dotCount > 1) return false;  // 超过一个小数点
+        } else if (isdigit(c)) {
+            hasDigit = true;
+        } else {
+            return false;  // 非法字符
+        }
+    }
+
+    if (!hasDigit) return false;
+
+    // 检查小数位数
+    size_t dotPos = costStr.find('.');
+    if (dotPos != std::string::npos) {
+        size_t decimalDigits = costStr.length() - dotPos - 1;
+        if (decimalDigits > 2) return false;  // 小数位数超过2位
+    }
+
+    // 检查数值是否为正数
+    try {
+        double cost = std::stod(costStr);
+        return cost > 0.0;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Bookstore::isValidQuantityStr(const std::string& quantityStr) {
+    if (quantityStr.empty() || quantityStr.length() > 10) return false;
+
+    // 检查是否有前导0（"0" 是合法的，但 "0123" 不合法）
+    if (quantityStr.length() > 1 && quantityStr[0] == '0') {
+        return false;
+    }
+
+    // 检查是否都是数字
+    for (char c : quantityStr) {
+        if (!isdigit(c)) return false;
+    }
+
+    // 检查数值范围
+    try {
+        long long qty = std::stoll(quantityStr);
+        return qty > 0 && qty <= 2147483647LL;  // 不超过 int32 最大值
+    } catch (...) {
+        return false;
+    }
 }

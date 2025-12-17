@@ -40,7 +40,8 @@ public:
     bool handleAccountCommand(const std::vector<std::string>& tokens);
     bool handleBookCommand(const std::vector<std::string>& tokens);
     bool handleFinanceCommand(const std::vector<std::string>& tokens);
-
+    bool isValidQuantityStr(const std::string& quantityStr);
+    bool isValidTotalCostStr(const std::string& costStr);
 };
 
 
