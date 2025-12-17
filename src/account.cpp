@@ -269,7 +269,7 @@ bool AccountSystem::isUserLoggedIn(const std::string& userID) const {
 }
 
 bool AccountSystem::hasPrivilege(const int required) const {
-    return checkPrivilege(required);
+    return getCurrentPrivilege() >= required;
 }
 
 void AccountSystem::updateSelectedISBNForAll(const std::string& oldISBN, const std::string& newISBN) {

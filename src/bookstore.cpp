@@ -281,6 +281,22 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
 
 bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
     // std::cerr << "test3 ";
+
+    if (tokens.size() == 3) {
+        try {
+            const std::string& countStr = tokens[2];
+            // 校验前导0
+            if (countStr.length() > 1 && countStr[0] == '0') {
+                return false;
+            }
+            int count = std::stoi(countStr);
+            if (count < 0) return false;
+            return bookSystem.showFinance(count);
+        } catch (...) {
+            return false;
+        }
+    }
+
     if (tokens[0] != "show" || tokens.size() < 2) {
         // std::cerr << "test4  ";
         return false;

@@ -203,6 +203,16 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
     int dotCount = 0;
     bool hasDigit = false;
 
+    //"0123"非法，"0.12"合法
+    if (priceStr.length() > 1 && priceStr[0] == '0' && priceStr[1] != '.') {
+        return false;
+    }
+
+    // 校验是否为 ".10" 或 "10." 格式
+    if (priceStr[0] == '.' || priceStr.back() == '.') {
+        return false;
+    }
+
     for (char c : priceStr) {
         if (c == '.') {
             dotCount++;
@@ -233,6 +243,10 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
 
 bool BookSystem::isValidQuantityStr(const std::string& quantityStr) const {
     if (quantityStr.empty() || quantityStr.length() > 10) return false;
+
+    if (quantityStr.length() > 1 && quantityStr[0] == '0') {
+        return false;
+    }
 
     for (char c : quantityStr) {
         if (!isdigit(c)) return false;
