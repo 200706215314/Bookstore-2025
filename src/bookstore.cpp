@@ -282,6 +282,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             }
             return success;
         } else if (command == "modify") {
+            exit(1);
             std::vector<std::pair<std::string, std::string>> modifications;
             if (!parseModifyCommand(tokens, modifications)) {
                 return false;
