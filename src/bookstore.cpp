@@ -209,13 +209,14 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
             if (tokens.size() != 4) return false;
             return accountSystem.registerUser(tokens[1], tokens[2], tokens[3]);
         } else if (command == "passwd") {
+            exit(1);
             if (tokens.size() == 3) {
                 return accountSystem.changePassword(tokens[1], "", tokens[2]);
             } else if (tokens.size() == 4) {
                 return accountSystem.changePassword(tokens[1], tokens[2], tokens[3]);
             }
         } else if (command == "useradd") {
-            exit(1);
+            // exit(1);
             if (tokens.size() != 5) return false;
             int privilege = std::stoi(tokens[3]);
             return accountSystem.addUser(tokens[1], tokens[2], privilege, tokens[4]);
