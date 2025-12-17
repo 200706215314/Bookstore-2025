@@ -202,6 +202,7 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
 
     int dotCount = 0;
     bool hasDigit = false;
+    bool hasLeadingZero = false;
 
     //"0123"非法，"0.12"合法
     if (priceStr.length() > 1 && priceStr[0] == '0' && priceStr[1] != '.') {
@@ -594,6 +595,8 @@ bool BookSystem::modifyBook(const std::string& selectedISBN,
 bool BookSystem::importBook(const std::string& selectedISBN, long long quantity, double totalCost) {
     if (selectedISBN.empty() || !bookExistsStr(selectedISBN)) return false;
     if (quantity <= 0 || totalCost <= 0) return false;
+
+    if (totalCost <= 0.0) return false;
 
     BookData book = getBookByISBNStr(selectedISBN);
 

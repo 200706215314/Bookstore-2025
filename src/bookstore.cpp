@@ -47,15 +47,20 @@ bool Bookstore::parseShowCommand(const std::vector<std::string>& tokens,
     if (param.find("-ISBN=") == 0) {
         type = "ISBN";
         value = param.substr(6);
+        if (value.empty()) return false;
     } else if (param.find("-name=\"") == 0 && param.back() == '\"') {
         type = "name";
         value = param.substr(7, param.length() - 8); // 移除-name="和结尾的"
+        if (value.empty()) return false;
     } else if (param.find("-author=\"") == 0 && param.back() == '\"') {
         type = "author";
         value = param.substr(9, param.length() - 10);
+        if (value.empty()) return false;
     } else if (param.find("-keyword=\"") == 0 && param.back() == '\"') {
         type = "keyword";
         value = param.substr(10, param.length() - 11);
+        if (value.empty()) return false;
+        if (value.find('|') != std::string::npos) return false;    // 检查是否为单个关键词
     } else {
         return false;
     }
@@ -88,23 +93,33 @@ bool Bookstore::parseModifyCommand(const std::vector<std::string>& tokens,
     return true;
 }
 
-    bool Bookstore::checkCommandPrivilege(const std::string& command, const std::string& command_, int& requiredPrivilege) {
+    bool Bookstore::checkCommandPrivilege(const std::vector<std::string>& tokens, int& requiredPrivilege) {
+    if (tokens.empty()) return false;
+
+    const std::string command = tokens[0];
+    const std::string subcommand = tokens.size() >= 2 ? tokens[1] : "";
+
     if (command == "su" || command == "register") {
         requiredPrivilege = 0;
     }
-    else if (command == "logout" || command == "passwd" ||
-               (command == "show" && command_ != "finance") || command == "buy") {
+    else if (command == "logout" || command == "passwd" || command == "buy") {
         requiredPrivilege = 1;
-               }
+    }
+    else if (command == "show") {
+        if (subcommand == "finance") {
+            requiredPrivilege = 7;
+        } else {
+            requiredPrivilege = 1;  // 普通show命令
+        }
+    }
     else if (command == "useradd" || command == "select" ||
-                          command == "modify" || command == "import") {
-                   requiredPrivilege = 3;
-                          }
-    else if (command == "delete" || command == "show finance" ||
-                                     command == "log" || (command == "show" && command_ == "finance") ||
-                                     command == "report employee") {
-                              requiredPrivilege = 7;
-                                     }
+              command == "modify" || command == "import") {
+        requiredPrivilege = 3;
+              }
+    else if (command == "delete" || command == "log" ||
+              command == "report") {
+        requiredPrivilege = 7;
+              }
     else {
         return false;
     }
@@ -123,10 +138,6 @@ void Bookstore::run() {
         if (tokens.empty()) continue;
         
         std::string command = tokens[0];
-        std::string command_ = "";
-        if (tokens.size() >= 2) {
-            command_ = tokens[1];
-        }
 
         if (command == "quit" || command == "exit") {
             if (tokens.size() != 1) {
@@ -138,7 +149,7 @@ void Bookstore::run() {
         }
 
         int requiredPrivilege = 0;
-        if (!checkCommandPrivilege(command, command_, requiredPrivilege)) {
+        if (!checkCommandPrivilege(tokens, requiredPrivilege)) {  // 传递 tokens
             std::cout << "Invalid" << std::endl;
             continue;
         }
