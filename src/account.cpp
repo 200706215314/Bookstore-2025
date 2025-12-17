@@ -125,7 +125,6 @@ bool AccountSystem::logout() {
     if (loginStack.empty()) {
         return false;
     }
-    clearSelectedBook();
     loginStack.pop_back();
     return true;
 }

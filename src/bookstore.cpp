@@ -241,6 +241,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
     // }
     try {
         if (command == "show") {
+            exit(1);
             std::string type, value;
             if (!parseShowCommand(tokens, type, value)) return false;
             return bookSystem.showBooks(type, value);
