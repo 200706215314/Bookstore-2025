@@ -235,7 +235,6 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
         }
     }
 
-    const size_t dotPos = priceStr.find('.');
     if (dotPos != std::string::npos) {
         if (priceStr.length() - dotPos - 1 > 2) return false;
     }
