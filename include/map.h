@@ -8,7 +8,7 @@
 #include <algorithm>
 #include "MemoryRiver.h"
 
-constexpr int BLOCK_SIZE = 1200;
+constexpr int BLOCK_SIZE = 2000;
 
 template<typename KeyType, typename ValueType>
 class Map {
