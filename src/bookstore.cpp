@@ -39,7 +39,11 @@ bool Bookstore::parseShowCommand(const std::vector<std::string>& tokens,
         value = "";
         return true;
     }
-    
+
+    for (auto i : value) {
+        std::cerr << i << " ";
+    }
+
     if (tokens.size() != 2) return false;
     
     std::string param = tokens[1];

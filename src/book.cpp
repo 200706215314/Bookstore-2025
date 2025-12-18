@@ -165,7 +165,8 @@ bool BookSystem::isValidISBNStr(const std::string& isbn) {
     // 应该检查 cleanIsbn 而不是 isbn！
     if (cleanIsbn.empty() || cleanIsbn.length() > 20) return false;
     for (char c : cleanIsbn) {  // 遍历 cleanIsbn
-        if (c < 32 || c > 126) return false; // 不可见字符
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (uc < 32 || uc > 126) return false; // 不可见字符
     }
     return true;
 }
@@ -173,7 +174,8 @@ bool BookSystem::isValidISBNStr(const std::string& isbn) {
 bool BookSystem::isValidBookNameStr(const std::string& name) {
     if (name.empty() || name.length() > 60) return false;
     for (const char c : name) {
-        if (c < 32 || c > 126 || c == '\"') return false;
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (uc < 32 || uc > 126 || uc == '\"') return false;
     }
     return true;
 }
@@ -181,7 +183,8 @@ bool BookSystem::isValidBookNameStr(const std::string& name) {
 bool BookSystem::isValidAuthorStr(const std::string& author) {
     if (author.empty() || author.length() > 60) return false;
     for (char c : author) {
-        if (c < 32 || c > 126 || c == '\"') return false;
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (uc < 32 ||uc > 126 || uc == '\"') return false;
     }
     return true;
 }
@@ -210,7 +213,6 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
 
     int dotCount = 0;
     bool hasDigit = false;
-    bool hasLeadingZero = false;
 
     //"0123"非法，"0.12"合法
     if (priceStr.length() > 1 && priceStr[0] == '0' && priceStr[1] != '.') {
@@ -265,7 +267,8 @@ bool BookSystem::isValidQuantityStr(const std::string& quantityStr) const {
     }
 
     for (char c : quantityStr) {
-        if (!isdigit(c)) return false;
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (!isdigit(uc)) return false;
     }
 
     try {
@@ -449,6 +452,10 @@ std::vector<BookData> BookSystem::getAllBooksFromMap() const {
 
 bool BookSystem::showBooks(const std::string& type, const std::string& value) {  //param_type  param_value
     std::vector<BookData> results;
+
+    for (auto i : value) {
+        std::cerr << i << " ";
+    }
 
     if (type.empty()) {
         results = getAllBooks();
