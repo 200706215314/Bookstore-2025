@@ -404,6 +404,7 @@ bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
 bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
     if (costStr.empty() || costStr.length() > 13) return false;
 
+    // 检查前导0
     if (costStr.length() > 1 && costStr[0] == '0') {
         if (costStr[1] != '.') {
             return false;  // "0123", "01.23" 非法
@@ -423,11 +424,11 @@ bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
         char c = costStr[i];
         if (c == '.') {
             dotCount++;
-            if (dotCount > 1) return false;  // 超过一个小数点
+            if (dotCount > 1) return false;
         } else if (isdigit(c)) {
             hasDigit = true;
         } else {
-            return false;  // 非法字符
+            return false;
         }
     }
 
@@ -437,13 +438,13 @@ bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
     size_t dotPos = costStr.find('.');
     if (dotPos != std::string::npos) {
         size_t decimalDigits = costStr.length() - dotPos - 1;
-        if (decimalDigits > 2) return false;  // 小数位数超过2位
+        if (decimalDigits > 2) return false;
     }
 
-    // 检查数值是否为正数
+    // 检查数值是否为正数（必须 > 0）
     try {
         double cost = std::stod(costStr);
-        return cost > 0.0;
+        return cost > 0.0;  // 必须大于0
     } catch (...) {
         return false;
     }
@@ -452,20 +453,20 @@ bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
 bool Bookstore::isValidQuantityStr(const std::string& quantityStr) {
     if (quantityStr.empty() || quantityStr.length() > 10) return false;
 
-    // 检查是否有前导0（"0" 是合法的，但 "0123" 不合法）
-    if (quantityStr.length() > 1 && quantityStr[0] == '0') {
-        return false;
-    }
-
     // 检查是否都是数字
     for (char c : quantityStr) {
         if (!isdigit(c)) return false;
     }
 
+    // 检查前导0（包括"0"）
+    if (quantityStr[0] == '0') {
+        return false;  // "0", "0123" 都非法
+    }
+
     // 检查数值范围
     try {
         long long qty = std::stoll(quantityStr);
-        return qty > 0 && qty <= 2147483647LL;  // 不超过 int32 最大值
+        return qty > 0 && qty <= 2147483647LL;
     } catch (...) {
         return false;
     }
