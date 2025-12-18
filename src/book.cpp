@@ -162,8 +162,9 @@ bool BookSystem::isValidISBNStr(const std::string& isbn) {
         cleanIsbn = cleanIsbn.substr(1, cleanIsbn.size() - 2);
     }
 
-    if (isbn.empty() || isbn.length() > 20) return false;
-    for (char c : isbn) {
+    // 应该检查 cleanIsbn 而不是 isbn！
+    if (cleanIsbn.empty() || cleanIsbn.length() > 20) return false;
+    for (char c : cleanIsbn) {  // 遍历 cleanIsbn
         if (c < 32 || c > 126) return false; // 不可见字符
     }
     return true;
@@ -449,11 +450,11 @@ std::vector<BookData> BookSystem::getAllBooksFromMap() const {
 bool BookSystem::showBooks(const std::string& type, const std::string& value) {  //param_type  param_value
     std::vector<BookData> results;
 
-
     if (type.empty()) {
         results = getAllBooks();
     } else if (type == "ISBN") {
         if (value.empty()) return false;  // ISBN不能为空
+        if (!isValidISBNStr(value)) return false;  // ← 增加验证！
         results = searchByISBN(value);
     } else if (type == "name") {
         if (value.empty()) return false;  // 书名不能为空
