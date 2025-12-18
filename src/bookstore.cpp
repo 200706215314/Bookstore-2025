@@ -234,7 +234,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
             if (!isdigit(privilegeStr[0])) return false;
 
             char c = privilegeStr[0];
-            if (c != '1' && c != '3' && c != '7') return false;
+            if (c != '0' && c != '1' && c != '3' && c != '7') return false;
 
             int privilege = std::stoi(privilegeStr);
             return accountSystem.addUser(tokens[1], tokens[2], privilege, tokens[4]);
