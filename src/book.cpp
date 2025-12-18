@@ -460,6 +460,7 @@ bool BookSystem::showBooks(const std::string& type, const std::string& value) { 
     if (type.empty()) {
         results = getAllBooks();
     } else if (type == "ISBN") {
+        exit(1);
         if (value.empty()) return false;  // ISBN不能为空
         if (!isValidISBNStr(value)) return false;  // ← 增加验证！
         results = searchByISBN(value);
