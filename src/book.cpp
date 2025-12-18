@@ -453,9 +453,9 @@ std::vector<BookData> BookSystem::getAllBooksFromMap() const {
 bool BookSystem::showBooks(const std::string& type, const std::string& value) {  //param_type  param_value
     std::vector<BookData> results;
 
-    for (auto i : value) {
-        std::cerr << i << " ";
-    }
+    // for (auto i : value) {
+    //     std::cerr << i << " ";
+    // }
 
     if (type.empty()) {
         results = getAllBooks();
