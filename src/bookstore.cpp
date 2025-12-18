@@ -222,10 +222,21 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
             } else if (tokens.size() == 4) {
                 return accountSystem.changePassword(tokens[1], tokens[2], tokens[3]);
             }
-        } else if (command == "useradd") {
-            // exit(1);
+        }     else if (command == "useradd") {
             if (tokens.size() != 5) return false;
-            int privilege = std::stoi(tokens[3]);
+            // 这里需要检查privilege字符串是否合法
+            const std::string& privilegeStr = tokens[3];
+
+            // 检查长度
+            if (privilegeStr.length() != 1) return false;
+
+            // 检查是否数字
+            if (!isdigit(privilegeStr[0])) return false;
+
+            char c = privilegeStr[0];
+            if (c != '1' && c != '3' && c != '7') return false;
+
+            int privilege = std::stoi(privilegeStr);
             return accountSystem.addUser(tokens[1], tokens[2], privilege, tokens[4]);
         } else if (command == "delete") {
             // exit(1);
@@ -349,14 +360,36 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
 
 bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
     // std::cerr << "test3 ";
+    if (tokens[0] != "show" || tokens.size() < 2) {
+        return false;
+    }
 
-    if (tokens.size() == 3) {
+    std::string subcommand = tokens[1];
+    if (subcommand != "finance") {
+        return false;
+    }
+
+    if (tokens.size() == 2) {
+        // show finance（无参数）
+        return bookSystem.showFinance(-1);
+    } else if (tokens.size() == 3) {
+        // show finance [Count]
+        const std::string& countStr = tokens[2];
+
+        // 检查是否为空
+        if (countStr.empty()) return false;
+
+        // 检查是否都是数字
+        for (char c : countStr) {
+            if (!isdigit(c)) return false;
+        }
+
+        // 检查前导0（"0"合法，但"0123"非法）
+        if (countStr.length() > 1 && countStr[0] == '0') {
+            return false;
+        }
+
         try {
-            const std::string& countStr = tokens[2];
-            // 校验前导0
-            if (countStr.length() > 1 && countStr[0] == '0') {
-                return false;
-            }
             int count = std::stoi(countStr);
             if (count < 0) return false;
             return bookSystem.showFinance(count);
@@ -365,39 +398,7 @@ bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
         }
     }
 
-    if (tokens[0] != "show" || tokens.size() < 2) {
-        // std::cerr << "test4  ";
-        return false;
-    }
-    
-    std::string subcommand = tokens[1];
-    if (subcommand != "finance") {
-        // std::cerr << "test5  ";
-        return false;
-    }
-    
-    if (tokens.size() == 2) {
-        // show finance
-        // std::cerr << "test 6  ";
-        return bookSystem.showFinance(-1);
-    } else if (tokens.size() == 3) {
-        // show finance [Count]
-        // std::cerr << " test 7";
-        try {
-            int count = std::stoi(tokens[2]);
-            // std::cerr << "test8 ";
-            if (count < 0) {
-                // std::cerr << "test 9  ";
-                return false;
-            }
-            return bookSystem.showFinance(count);
-        } catch (...) {
-            // std::cerr << "test 10  ";
-            return false;
-        }
-    }
-    
-    return false;
+    return false;  // 参数过多
 }
 
 bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
