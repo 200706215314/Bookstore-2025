@@ -211,6 +211,19 @@ bool BookSystem::isValidKeywordsStr(const std::string& keywords) const {    //�
 bool BookSystem::isValidPriceStr(const std::string& priceStr) {
     if (priceStr.empty() || priceStr.length() > 13) return false;
 
+    // 检查前导0
+    if (priceStr.length() > 1 && priceStr[0] == '0') {
+        // 允许 "0.x" 但不允许 "00.x", "01.x", "0123" 等
+        if (priceStr[1] != '.') {
+            return false;  // "0123", "01.23" 非法
+        }
+    }
+
+    // 检查是否以 '.' 开头或结尾
+    if (priceStr[0] == '.' || priceStr.back() == '.') {
+        return false;
+    }
+
     int dotCount = 0;
     bool hasDigit = false;
 
@@ -262,15 +275,17 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
 bool BookSystem::isValidQuantityStr(const std::string& quantityStr) const {
     if (quantityStr.empty() || quantityStr.length() > 10) return false;
 
-    if (quantityStr.length() > 1 && quantityStr[0] == '0') {
-        return false;
-    }
-
+    // 检查是否都是数字
     for (char c : quantityStr) {
-        unsigned char uc = static_cast<unsigned char>(c);
-        if (!isdigit(uc)) return false;
+        if (!isdigit(c)) return false;
     }
 
+    // 检查前导0（包括"0"）
+    if (quantityStr[0] == '0') {
+        return false;  // "0", "0123" 都非法
+    }
+
+    // 检查数值范围
     try {
         long long qty = std::stoll(quantityStr);
         return qty > 0 && qty <= 2147483647LL;

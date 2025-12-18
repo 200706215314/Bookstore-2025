@@ -403,6 +403,12 @@ bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
 bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
     if (costStr.empty() || costStr.length() > 13) return false;
 
+    if (costStr.length() > 1 && costStr[0] == '0') {
+        if (costStr[1] != '.') {
+            return false;  // "0123", "01.23" 非法
+        }
+    }
+
     // 检查是否以 '.' 开头或结尾
     if (costStr[0] == '.' || costStr.back() == '.') {
         return false;
