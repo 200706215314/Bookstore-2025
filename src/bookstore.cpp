@@ -266,7 +266,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             if (!parseShowCommand(tokens, type, value)) return false;
             return bookSystem.showBooks(type, value);
         } else if (command == "buy") {
-            // exit(1);
+            exit(1);
             if (tokens.size() != 3) return false;
             long long quantity = std::stoll(tokens[2]);
             double total = 0.0;
