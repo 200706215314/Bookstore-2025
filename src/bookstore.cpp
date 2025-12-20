@@ -243,7 +243,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
             int privilege = std::stoi(privilegeStr);
             return accountSystem.addUser(tokens[1], tokens[2], privilege, tokens[4]);
         } else if (command == "delete") {
-            exit(1);
+            // exit(1);
             if (tokens.size() != 2) return false;
             return accountSystem.deleteUser(tokens[1]);
         }
