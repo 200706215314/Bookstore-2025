@@ -226,7 +226,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
                 return accountSystem.changePassword(tokens[1], tokens[2], tokens[3]);
             }
         }     else if (command == "useradd") {
-            exit(1);
+            // exit(1);
             if (tokens.size() != 5) return false;
             // 这里需要检查privilege字符串是否合法
             const std::string& privilegeStr = tokens[3];
@@ -243,7 +243,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
             int privilege = std::stoi(privilegeStr);
             return accountSystem.addUser(tokens[1], tokens[2], privilege, tokens[4]);
         } else if (command == "delete") {
-            // exit(1);
+            exit(1);
             if (tokens.size() != 2) return false;
             return accountSystem.deleteUser(tokens[1]);
         }
