@@ -133,21 +133,45 @@ bool Bookstore::parseModifyCommand(const std::vector<std::string>& tokens,
     }
 
 void Bookstore::run() {
-    while (!std::cin.eof()) {
-        std::string line;
-        std::getline(std::cin, line);
-
+    std::string line;
+    while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
 
-        std::vector<std::string> tokens = tokenize(line);
-        if (tokens.empty()) continue;
+        // 检查是否包含 EOF
+        bool shouldExit = false;
 
-        if (line == "EOF" || line == "eof") {
-            break;  // 直接退出程序
+        size_t eofPos = line.find("EOF");
+        if (eofPos != std::string::npos) {
+            // 检查 "EOF" 是否是独立单词（前后是空格或是行首/行尾）
+            bool isStart = (eofPos == 0);
+            bool isEnd = (eofPos + 3 == line.length());
+            bool hasSpaceBefore = (eofPos > 0 && line[eofPos-1] == ' ');
+            bool hasSpaceAfter = (eofPos + 3 < line.length() && line[eofPos+3] == ' ');
+
+            if (isStart || hasSpaceBefore) {
+                shouldExit = true;
+                // 移除 EOF 部分及其前面的空格
+                line = line.substr(0, eofPos);
+                // 移除可能的尾部空格
+                while (!line.empty() && line.back() == ' ') {
+                    line.pop_back();
+                }
+                if (line.empty()) {
+                    // 如果只剩下 EOF，直接退出
+                    break;
+                }
+            }
+        }
+
+        std::vector<std::string> tokens = tokenize(line);
+        if (tokens.empty()) {
+            if (shouldExit) break;
+            continue;
         }
 
         std::string command = tokens[0];
 
+        // 处理退出命令
         if (command == "quit" || command == "exit") {
             if (tokens.size() != 1) {
                 std::cout << "Invalid" << std::endl;
@@ -157,20 +181,28 @@ void Bookstore::run() {
             continue;
         }
 
+        // 检查权限
         int requiredPrivilege = 0;
-        if (!checkCommandPrivilege(tokens, requiredPrivilege)) {  // 传递 tokens
+        if (!checkCommandPrivilege(tokens, requiredPrivilege)) {
             std::cout << "Invalid" << std::endl;
+            if (shouldExit) break;
             continue;
         }
-        
+
         if (!accountSystem.hasPrivilege(requiredPrivilege)) {
             std::cout << "Invalid" << std::endl;
+            if (shouldExit) break;
             continue;
         }
+
         // 处理指令
         if (!processCommand(tokens)) {
             std::cout << "Invalid\n";
-            // std::cout << "Invalid" << std::endl;
+        }
+
+        // 如果应该退出，执行完当前命令后退出
+        if (shouldExit) {
+            break;
         }
     }
 }
