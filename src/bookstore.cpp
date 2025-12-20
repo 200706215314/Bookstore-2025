@@ -276,7 +276,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             }
             return success;
         } else if (command == "select") {
-            exit(1);
+            // exit(1);
             // std::cerr << "test1  " << tokens.size()  << std::endl;
             if (tokens.size() != 2) {
                 return false;
@@ -301,7 +301,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             }
             return success;
         } else if (command == "modify") {
-            // exit(1);
+            exit(1);
             std::vector<std::pair<std::string, std::string>> modifications;
             if (!parseModifyCommand(tokens, modifications)) {
                 return false;
