@@ -110,7 +110,7 @@ std::string BookData::toString() const {
         << getAuthor() << "\t"
         << getKeywords() << "\t"
         << Price << "\t"
-        << Stock;
+        << Stock<<"\n";
     return oss.str();
 }
 
