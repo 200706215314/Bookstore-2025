@@ -203,7 +203,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
     
     try {
         if (command == "su") {
-            exit(1);
+            // exit(1);
             if (tokens.size() == 2) {
                 string tmp = "";
                 return accountSystem.login(tokens[1], tmp);
@@ -211,7 +211,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
                 return accountSystem.login(tokens[1], tokens[2]);
             }
         } else if (command == "logout") {
-            //exit(1);
+            exit(1);
             if (tokens.size() != 1) return false;
             return accountSystem.logout();
         } else if (command == "register") {
