@@ -324,7 +324,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
 
             return success;
         } else if (command == "import") {
-            // exit(1);
+            exit(1);
             if (tokens.size() != 3) return false;
 
             std::string quantityStr = tokens[1];
