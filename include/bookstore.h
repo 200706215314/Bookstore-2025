@@ -42,6 +42,8 @@ public:
     bool handleFinanceCommand(const std::vector<std::string>& tokens);
     bool isValidQuantityStr(const std::string& quantityStr);
     bool isValidTotalCostStr(const std::string& costStr);
+
+    bool isValidQuantityStrForBuy(const std::string& quantityStr);
 };
 
 

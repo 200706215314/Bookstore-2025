@@ -266,15 +266,30 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             if (!parseShowCommand(tokens, type, value)) return false;
             return bookSystem.showBooks(type, value);
         } else if (command == "buy") {
-            // exit(1);
             if (tokens.size() != 3) return false;
-            long long quantity = std::stoll(tokens[2]);
-            double total = 0.0;
-            bool success = bookSystem.buyBook(tokens[1], quantity, total);
-            if (success) {
-                std::cout << std::fixed << std::setprecision(2) << total << "\n";
+
+            const std::string& isbn = tokens[1];
+            const std::string& quantityStr = tokens[2];
+
+            if (!bookSystem.isValidISBNStr(isbn)) {
+                return false;
             }
-            return success;
+
+            if (!isValidQuantityStrForBuy(quantityStr)) {
+                return false;
+            }
+
+            try {
+                long long quantity = std::stoll(quantityStr);
+                double total = 0.0;
+                bool success = bookSystem.buyBook(isbn, quantity, total);
+                if (success) {
+                    std::cout << std::fixed << std::setprecision(2) << total << "\n";
+                }
+                return success;
+            } catch (...) {
+                return false;
+            }
         } else if (command == "select") {
             // exit(1);
             // std::cerr << "test1  " << tokens.size()  << std::endl;
@@ -301,7 +316,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             }
             return success;
         } else if (command == "modify") {
-            exit(1);
+            // exit(1);
             std::vector<std::pair<std::string, std::string>> modifications;
             if (!parseModifyCommand(tokens, modifications)) {
                 return false;
@@ -458,6 +473,28 @@ bool Bookstore::isValidQuantityStr(const std::string& quantityStr) {
     if (quantityStr.empty() || quantityStr.length() > 10) return false;
 
     // 检查是否都是数字
+    for (char c : quantityStr) {
+        if (!isdigit(c)) return false;
+    }
+
+    // 检查前导0（包括"0"）
+    if (quantityStr[0] == '0') {
+        return false;  // "0", "0123" 都非法
+    }
+
+    // 检查数值范围
+    try {
+        long long qty = std::stoll(quantityStr);
+        return qty > 0 && qty <= 2147483647LL;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Bookstore::isValidQuantityStrForBuy(const std::string& quantityStr) {
+    if (quantityStr.empty() || quantityStr.length() > 10) return false;
+
+    // 检查是否都是数字（不能有小数点）
     for (char c : quantityStr) {
         if (!isdigit(c)) return false;
     }
