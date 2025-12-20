@@ -215,11 +215,11 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
             if (tokens.size() != 1) return false;
             return accountSystem.logout();
         } else if (command == "register") {
-            exit(1);
+            // exit(1);
             if (tokens.size() != 4) return false;
             return accountSystem.registerUser(tokens[1], tokens[2], tokens[3]);
         } else if (command == "passwd") {
-            // exit(1);
+            exit(1);
             if (tokens.size() == 3) {
                 return accountSystem.changePassword(tokens[1], "", tokens[2]);
             } else if (tokens.size() == 4) {
