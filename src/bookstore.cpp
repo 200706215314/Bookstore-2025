@@ -141,7 +141,11 @@ void Bookstore::run() {
 
         std::vector<std::string> tokens = tokenize(line);
         if (tokens.empty()) continue;
-        
+
+        if (line == "EOF" || line == "eof") {
+            break;  // 直接退出程序
+        }
+
         std::string command = tokens[0];
 
         if (command == "quit" || command == "exit") {
