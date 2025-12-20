@@ -134,49 +134,21 @@ bool Bookstore::parseModifyCommand(const std::vector<std::string>& tokens,
 
 void Bookstore::run() {
     std::string line;
+
+    // 使用 while(getline(cin, line)) 可以自动检测 EOF
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
 
-        // 检查是否包含 EOF
-        bool shouldExit = false;
-
-        size_t eofPos = line.find("EOF");
-        if (eofPos != std::string::npos) {
-            // 检查 "EOF" 是否是独立单词（前后是空格或是行首/行尾）
-            bool isStart = (eofPos == 0);
-            bool isEnd = (eofPos + 3 == line.length());
-            bool hasSpaceBefore = (eofPos > 0 && line[eofPos-1] == ' ');
-            bool hasSpaceAfter = (eofPos + 3 < line.length() && line[eofPos+3] == ' ');
-
-            if (isStart || hasSpaceBefore) {
-                shouldExit = true;
-                // 移除 EOF 部分及其前面的空格
-                line = line.substr(0, eofPos);
-                // 移除可能的尾部空格
-                while (!line.empty() && line.back() == ' ') {
-                    line.pop_back();
-                }
-                if (line.empty()) {
-                    // 如果只剩下 EOF，直接退出
-                    break;
-                }
-            }
-        }
-
         std::vector<std::string> tokens = tokenize(line);
-        if (tokens.empty()) {
-            if (shouldExit) break;
-            continue;
-        }
+        if (tokens.empty()) continue;
 
         std::string command = tokens[0];
 
-        // 处理退出命令
         if (command == "quit" || command == "exit") {
             if (tokens.size() != 1) {
                 std::cout << "Invalid" << std::endl;
             } else {
-                break;
+                break;  // 根据指令要求终止运行
             }
             continue;
         }
@@ -185,13 +157,11 @@ void Bookstore::run() {
         int requiredPrivilege = 0;
         if (!checkCommandPrivilege(tokens, requiredPrivilege)) {
             std::cout << "Invalid" << std::endl;
-            if (shouldExit) break;
             continue;
         }
 
         if (!accountSystem.hasPrivilege(requiredPrivilege)) {
             std::cout << "Invalid" << std::endl;
-            if (shouldExit) break;
             continue;
         }
 
@@ -199,12 +169,9 @@ void Bookstore::run() {
         if (!processCommand(tokens)) {
             std::cout << "Invalid\n";
         }
-
-        // 如果应该退出，执行完当前命令后退出
-        if (shouldExit) {
-            break;
-        }
     }
+
+    // 当 getline 返回 false（遇到 EOF）时，循环自动结束
 }
 
 bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
@@ -298,7 +265,7 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             if (!parseShowCommand(tokens, type, value)) return false;
             return bookSystem.showBooks(type, value);
         } else if (command == "buy") {
-            // exit(1);
+            exit(1);
             if (tokens.size() != 3) return false;
             long long quantity = std::stoll(tokens[2]);
             double total = 0.0;
