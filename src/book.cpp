@@ -110,7 +110,7 @@ std::string BookData::toString() const {
         << getAuthor() << "\t"
         << getKeywords() << "\t"
         << Price << "\t"
-        << Stock<<"\n";
+        << Stock;
     return oss.str();
 }
 
@@ -166,7 +166,7 @@ bool BookSystem::isValidISBNStr(const std::string& isbn) {
     if (cleanIsbn.empty() || cleanIsbn.length() > 20) return false;
     for (char c : cleanIsbn) {  // 遍历 cleanIsbn
         unsigned char uc = static_cast<unsigned char>(c);
-        if (uc < 32 || uc > 126) return false; // 不可见字符
+        if (uc < 33 || uc > 126) return false; // 不可见字符
     }
     return true;
 }
@@ -175,7 +175,7 @@ bool BookSystem::isValidBookNameStr(const std::string& name) {
     if (name.empty() || name.length() > 60) return false;
     for (const char c : name) {
         unsigned char uc = static_cast<unsigned char>(c);
-        if (uc < 32 || uc > 126 || uc == '\"') return false;
+        if (uc < 33 || uc > 126 || uc == '\"') return false;
     }
     return true;
 }
@@ -184,7 +184,7 @@ bool BookSystem::isValidAuthorStr(const std::string& author) {
     if (author.empty() || author.length() > 60) return false;
     for (char c : author) {
         unsigned char uc = static_cast<unsigned char>(c);
-        if (uc < 32 ||uc > 126 || uc == '\"') return false;
+        if (uc < 33 ||uc > 126 || uc == '\"') return false;
     }
     return true;
 }
@@ -518,7 +518,7 @@ bool BookSystem::isValidSingleKeywordStr(const std::string& keyword) const {
 
     // 检查是否为可见字符
     for (char c : keyword) {
-        if (c < 32 || c > 126) return false;
+        if (c < 33 || c > 126) return false;
     }
     return true;
 }
