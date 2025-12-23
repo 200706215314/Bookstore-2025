@@ -14,7 +14,7 @@ testcase/**
 testcases/**
 
 # download files
-bonus.md
+Bonus.md
 README.md
 业务要求.md
 标准要求.md
@@ -25,10 +25,9 @@ tests.pdf
 
 # additional file
 run_tests.sh
-oh shit.cpp
-oh shit
 book_data_author
 book_data_isbn
 book_data_keyword
 book_data_name
-dataset.md
+2967.cpp
+run_tests
