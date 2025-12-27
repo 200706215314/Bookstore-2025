@@ -207,5 +207,17 @@ public:
     bool hasPrivilege(int required) const;
 
     void updateSelectedISBNForAll(const std::string& oldISBN, const std::string& newISBN);
+
+    std::vector<Account> getAllAccounts() const {
+        return accountMap.getAllValues();
+    }
+
+    Account getAccountByID(const std::string& userID) const {
+        std::vector<Account> accounts = accountMap.find(CharIndex(userID));
+        if (!accounts.empty()) {
+            return accounts[0];
+        }
+        return {};
+    }
 };
 #endif //BOOKSTORE_2025_ACCOUNT_H

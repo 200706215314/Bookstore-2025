@@ -10,7 +10,6 @@ cmake-build-debug
 .idea/**
 
 # testcases
-testcase/**
 testcases/**
 
 # download files
@@ -31,3 +30,4 @@ book_data_keyword
 book_data_name
 2967.cpp
 run_tests
+frontend/**

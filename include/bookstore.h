@@ -12,6 +12,7 @@
 #include "book.h"
 #include "parser.h"
 #include "token.h"
+#include "log.h"
 
 
 class Bookstore {
@@ -20,6 +21,7 @@ private:
     BookSystem bookSystem;
     std::string currentUserID;
     std::string selectedISBN;
+    LogSystem logSystem;
 
     std::vector<std::string> tokenize(const std::string& input);
     bool parseShowCommand(const std::vector<std::string>& tokens,
@@ -40,6 +42,7 @@ public:
     bool handleAccountCommand(const std::vector<std::string>& tokens);
     bool handleBookCommand(const std::vector<std::string>& tokens);
     bool handleFinanceCommand(const std::vector<std::string>& tokens);
+    bool handleLogCommand(const std::vector<std::string>& tokens);
     bool isValidQuantityStr(const std::string& quantityStr);
     bool isValidTotalCostStr(const std::string& costStr);
 

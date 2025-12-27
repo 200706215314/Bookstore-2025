@@ -1,8 +1,8 @@
 #include "../include/bookstore.h"
 
-Bookstore::Bookstore() 
-    : accountSystem("account_data"),
-      bookSystem("book_data") {}
+Bookstore::Bookstore() : accountSystem("account_data"),bookSystem("book_data") {
+    logSystem.setAccountSystem(&accountSystem);
+}
 
 Bookstore::~Bookstore() = default;
 
@@ -148,7 +148,7 @@ void Bookstore::run() {
             if (tokens.size() != 1) {
                 std::cout << "Invalid" << std::endl;
             } else {
-                break;  // 根据指令要求终止运行
+                break;
             }
             continue;
         }
@@ -165,13 +165,10 @@ void Bookstore::run() {
             continue;
         }
 
-        // 处理指令
         if (!processCommand(tokens)) {
             std::cout << "Invalid\n";
         }
     }
-
-    // 当 getline 返回 false（遇到 EOF）时，循环自动结束
 }
 
 bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
@@ -183,7 +180,21 @@ bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
         command_ = tokens[1];
     }
 
-    
+    if (command != "log" && command != "report") {
+        std::string logDetails;
+        for (size_t i = 0; i < tokens.size(); i++) {
+            if (i > 0) logDetails += " ";
+            if (command == "passwd" && (i == 2 || i == 3)) {
+                logDetails += "***";
+            } else if (command == "su" && i == 2) {
+                logDetails += "***";
+            } else {
+                logDetails += tokens[i];
+            }
+        }
+        logSystem.logOperation(accountSystem.getCurrentUserID(), command, logDetails);
+    }
+
     if (command == "su" || command == "logout" || command == "register" ||
         command == "passwd" || command == "useradd" || command == "delete") {
         return handleAccountCommand(tokens);
@@ -193,6 +204,8 @@ bool Bookstore::processCommand(const std::vector<std::string>& tokens) {
         return handleBookCommand(tokens);
     } else if (command == "show" && command_ == "finance") {
         return handleFinanceCommand(tokens);
+    }else if (command == "report" || command == "log") {
+        return handleLogCommand(tokens);
     }
     
     return false;
@@ -228,7 +241,7 @@ bool Bookstore::handleAccountCommand(const std::vector<std::string>& tokens) {
         }     else if (command == "useradd") {
             // exit(1);
             if (tokens.size() != 5) return false;
-            // 这里需要检查privilege字符串是否合法
+            // 检查privilege字符串是否合法
             const std::string& privilegeStr = tokens[3];
 
             // 检查长度
@@ -304,7 +317,6 @@ bool Bookstore::handleBookCommand(const std::vector<std::string>& tokens) {
             if (isbn.empty()) {
                 return false;
             }
-
             // 检查ISBN格式
             if (!bookSystem.isValidISBNStr(isbn)) {
                 return false;
@@ -417,9 +429,64 @@ bool Bookstore::handleFinanceCommand(const std::vector<std::string>& tokens) {
         }
     }
 
-    return false;  // 参数过多
+    return false;
 }
 
+bool Bookstore::handleLogCommand(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) return false;
+
+    std::string command = tokens[0];
+
+    try {
+        if (command == "report") {
+            if (tokens.size() != 2) return false;
+
+            if (tokens[1] == "finance") {
+                std::vector<std::pair<double, double>> financeData;
+
+                financeData = bookSystem.getAllFinanceRecords();
+
+                if (financeData.empty()) {
+                    auto summary = bookSystem.getFinanceSummary(-1);
+                    if (summary.first > 0 || summary.second > 0) {
+                        financeData.push_back(summary);
+                    }
+                }
+
+                std::string report = logSystem.generateFinanceReport(financeData);
+                std::cout << report;
+                return true;
+
+            } else if (tokens[1] == "employee") {
+
+                logSystem.collectEmployeeRecordsFromLogs();
+
+                std::string report = logSystem.generateEmployeeReport();
+                std::cout << report;
+                return true;
+            } else {
+                return false;
+            }
+
+        } else if (command == "log") {
+            if (tokens.size() != 1) return false;
+
+            logSystem.logOperation(accountSystem.getCurrentUserID(), "log", "查看系统日志");
+
+            std::string report = logSystem.generateFullLogReport();
+            std::cout << report;
+            return true;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "处理log/report命令时异常: " << e.what() << std::endl;
+        return false;
+    } catch (...) {
+        std::cerr << "处理log/report命令时未知异常" << std::endl;
+        return false;
+    }
+
+    return false;
+}
 bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
     if (costStr.empty() || costStr.length() > 13) return false;
 
@@ -429,12 +496,10 @@ bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
             return false;  // "0123", "01.23" 非法
         }
     }
-
     // 检查是否以 '.' 开头或结尾
     if (costStr[0] == '.' || costStr.back() == '.') {
         return false;
     }
-
     // 检查字符是否合法
     int dotCount = 0;
     bool hasDigit = false;
@@ -452,14 +517,12 @@ bool Bookstore::isValidTotalCostStr(const std::string& costStr) {
     }
 
     if (!hasDigit) return false;
-
     // 检查小数位数
     size_t dotPos = costStr.find('.');
     if (dotPos != std::string::npos) {
         size_t decimalDigits = costStr.length() - dotPos - 1;
         if (decimalDigits > 2) return false;
     }
-
     // 检查数值是否为正数（必须 > 0）
     try {
         double cost = std::stod(costStr);

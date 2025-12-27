@@ -261,6 +261,11 @@ struct FinanceRecord {
     bool operator==(const FinanceRecord& other) const {
         return income == other.income && expense == other.expense;
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const FinanceRecord& record) {
+        os << "+" << record.income << " -" << record.expense;
+        return os;
+    }
 };
 
 class FinanceSystem {
@@ -284,6 +289,16 @@ public:
     int getRecordCount() const { return transactionCount; }
 
     static std::string formatDouble(double value);
+
+
+
+    std::vector<FinanceRecord> getAllFinanceRecords() const {
+        return financeMap.getAllValues();
+    }
+
+    std::vector<FinanceRecord> findFinanceRecords(int transactionId) const {
+        return financeMap.find(transactionId);
+    }
 
 private:
     // 更新交易计数
@@ -359,6 +374,20 @@ public:
     }
 
     bool isValidSingleKeywordStr(const std::string& keyword) const;
+
+    std::vector<std::pair<double, double>> getAllFinanceRecords() {
+        std::vector<std::pair<double, double>> result;
+
+        // 获取所有 FinanceRecord 对象
+        std::vector<FinanceRecord> records = financeSystem.getAllFinanceRecords();
+
+        for (const auto& record : records) {
+            result.emplace_back(record.income, record.expense);
+        }
+
+        return result;
+    }
+
 };
 
 
