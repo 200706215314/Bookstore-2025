@@ -68,16 +68,6 @@ std::vector<OperationLog> LogSystem::getAllLogs() const {
     return operationLogs;
 }
 
-std::vector<OperationLog> LogSystem::getUserLogs(const std::string& userID) const {
-    std::vector<OperationLog> userLogs;
-    for (const auto& log : operationLogs) {
-        if (log.userID == userID) {
-            userLogs.push_back(log);
-        }
-    }
-    return userLogs;
-}
-
 std::vector<EmployeeRecord> LogSystem::getEmployeeRecords() const {
     return employeeRecords;
 }
@@ -130,24 +120,6 @@ void LogSystem::collectEmployeeRecordsFromLogs() {
     }
 
     std::cerr << "DEBUG: 收集到 " << employeeRecords.size() << " 条员工记录" << std::endl;
-}
-
-void LogSystem::updateEmployeeRecordsFromAccounts(const std::vector<Account>& accounts) {
-    std::unordered_map<std::string, std::pair<std::string, int>> accountInfo;
-    for (const auto& account : accounts) {
-        accountInfo[account.getUserID()] = {
-            account.getUsername(),
-            account.getPrivilege()
-        };
-    }
-
-    for (auto& record : employeeRecords) {
-        auto it = accountInfo.find(record.userID);
-        if (it != accountInfo.end()) {
-            record.username = it->second.first;
-            record.privilege = it->second.second;
-        }
-    }
 }
 
 std::string LogSystem::generateFinanceReport(const std::vector<std::pair<double, double>>& financeData) const {

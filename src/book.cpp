@@ -1,7 +1,6 @@
 #include "../include/book.h"
-#include "../include/parser.h"
-#include "../include/token.h"
 #include <unordered_set>
+#include <iomanip>
 
 BookData::BookData() :Price(0.0), Stock(0){
     memset(ISBN, 0, sizeof(ISBN));
@@ -272,27 +271,6 @@ bool BookSystem::isValidPriceStr(const std::string& priceStr) {
     return true;
 }
 
-bool BookSystem::isValidQuantityStr(const std::string& quantityStr) const {
-    if (quantityStr.empty() || quantityStr.length() > 10) return false;
-
-    // 检查是否都是数字
-    for (char c : quantityStr) {
-        if (!isdigit(c)) return false;
-    }
-
-    // 检查前导0（包括"0"）
-    if (quantityStr[0] == '0') {
-        return false;  // "0", "0123" 都非法
-    }
-
-    // 检查数值范围
-    try {
-        long long qty = std::stoll(quantityStr);
-        return qty > 0 && qty <= 2147483647LL;
-    } catch (...) {
-        return false;
-    }
-}
 
 
 std::vector<std::string> BookSystem::splitKeywords(const std::string& keywords) const {    //要求传入不带“” 的keyword

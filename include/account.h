@@ -6,6 +6,7 @@
 #define BOOKSTORE_2025_ACCOUNT_H
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <cstring>
 #include <cctype>
@@ -143,8 +144,8 @@ private:
 
 public:
     LoginInfo() : account(Account()), selectedISBN("") {}
-    LoginInfo(const Account& acc, const std::string& isbn = "")
-        : account(acc), selectedISBN(isbn) {}
+    LoginInfo(const Account& acc, std::string  isbn = "")
+        : account(acc), selectedISBN(std::move(isbn)) {}
 
     Account getAccount() const { return account; }
     std::string getSelectedISBN() const { return selectedISBN; }
@@ -165,13 +166,11 @@ private:
     bool isValidPassword(const std::string& pwd) const;
     bool isValidUsername(const std::string& uname) const;
     bool isValidPrivilege(int p) const;
-    bool isValidPrivilegeStr(const std::string& p) const;
 
     //辅助help
     bool userExists(const std::string& userID);
     Account getUser(const std::string& userID);
     void updateUser(const Account& account);
-    bool checkPrivilege(const int& required) const;
 
 public:
     explicit AccountSystem(const std::string& filename);

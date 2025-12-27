@@ -78,7 +78,6 @@ public:
 
     std::vector<OperationLog> getAllLogs() const;
 
-    std::vector<OperationLog> getUserLogs(const std::string& userID) const;
 
     std::vector<EmployeeRecord> getEmployeeRecords() const;
 
@@ -90,7 +89,6 @@ public:
 
     void collectEmployeeRecordsFromLogs();
 
-    void updateEmployeeRecordsFromAccounts(const std::vector<Account>& accounts);
 
     void clearLogs();
 };

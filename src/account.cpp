@@ -16,10 +16,6 @@ std::string Account::getPassword() const {
     return std::string(Password);
 }
 
-bool fileExists(const std::string& filename) {
-    std::ifstream f(filename);
-    return f.good();
-}
 
 AccountSystem::AccountSystem(const std::string& filename)
     : accountMap(filename), accountFile(filename) {
@@ -61,12 +57,6 @@ bool AccountSystem::isValidPrivilege(int p) const {
     return p == 1 || p == 3 || p == 7;
 }
 
-bool AccountSystem::isValidPrivilegeStr(const std::string& p) const {
-    if (p.length() != 1) return false;
-    char c = p[0];
-    return c == '1' || c == '3' || c == '7';
-}
-
 //辅助help
 bool AccountSystem::userExists(const std::string& userID) {
     return !accountMap.find(userID).empty();
@@ -87,9 +77,6 @@ void AccountSystem::updateUser(const Account& account) {
     accountMap.insert(account.getUserID(), account);
 }
 
-bool AccountSystem::checkPrivilege(const int& required) const {
-    return getCurrentPrivilege() >= required;
-}
 
 
 // 账户指令实现

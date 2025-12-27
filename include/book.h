@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 #include <cstring>
-#include <algorithm>
-#include <iomanip>
 #include "map.h"
 
 class BookData {
@@ -321,7 +319,6 @@ public:
     static bool isValidAuthorStr(const std::string& author);
     bool isValidKeywordsStr(const std::string& keywords) const;
     static bool isValidPriceStr(const std::string& priceStr);
-    bool isValidQuantityStr(const std::string& quantityStr) const;
 
     void updateIndices(const BookData& oldBook, const BookData& newBook);
     void addToIndices(const BookData& book);
